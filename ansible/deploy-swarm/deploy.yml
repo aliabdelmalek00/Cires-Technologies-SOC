@@ -1,0 +1,9 @@
+---
+- name: Setup Docker & NFS on Ubuntu
+  hosts: all
+  become: true
+  roles:
+    - docker_install
+    - mount_nfs
+
+

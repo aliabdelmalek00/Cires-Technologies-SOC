@@ -1,0 +1,9 @@
+# ansible vars
+ansible_user: azureuser
+ansible_become: true
+ansible_become_method: sudo
+
+# nfs vars
+nfs_server: 10.10.1.5
+nfs_share: /srv/nfs
+mount_point: /share
