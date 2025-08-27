@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 jobs:
   test-runner:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: [self-hosted, Linux, X64]
     steps:
       - name: run checkout
         uses: actions/checkout@v3
@@ -14,3 +14,4 @@ jobs:
         run: |
           sudo apt update
           sudo apt install ansible
+
