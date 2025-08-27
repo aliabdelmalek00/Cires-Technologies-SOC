@@ -1,4 +1,4 @@
-name: Initiate ssh Connectivity
+- name: Initiate ssh Connectivity
   hosts: all
   become: true
   roles:
