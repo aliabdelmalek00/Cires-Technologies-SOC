@@ -1,8 +1,4 @@
-- name: Initiate ssh Connectivity
-  hosts: all
-  become: true
-  roles:
-    - ssh_conn
+
 
 - name: Setup Docker & NFS on Ubuntu
   hosts: all
