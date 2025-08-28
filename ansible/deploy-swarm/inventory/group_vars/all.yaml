@@ -2,6 +2,7 @@
 ansible_user: azureuser
 ansible_become: true
 ansible_become_method: sudo
+ansible_ssh_private_key_file: ~/.ssh/id_rsa
 
 # nfs vars
 nfs_server: 10.10.1.5
