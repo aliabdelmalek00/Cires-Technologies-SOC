@@ -27,12 +27,11 @@ jobs:
       - name: Start SSH agent and add all keys
         run: |
           eval "$(ssh-agent -s)"
-          echo "${{ secrets.MANAGER1_PRIVATE_KEY }}" | ssh-add -
-          echo "${{ secrets.MANAGER2_PRIVATE_KEY }}" | ssh-add -
-          echo "${{ secrets.MANAGER3_PRIVATE_KEY }}" | ssh-add -
-          echo "${{ secrets.WORKER1_PRIVATE_KEY }}" | ssh-add -
-          echo "${{ secrets.WORKER2_PRIVATE_KEY }}" | ssh-add -
-        shell: bash
+          ssh-add - <<< "${{ secrets.MANAGER1_PRIVATE_KEY }}"
+          ssh-add - <<< "${{ secrets.MANAGER2_PRIVATE_KEY }}"
+          ssh-add - <<< "${{ secrets.MANAGER3_PRIVATE_KEY }}"
+          ssh-add - <<< "${{ secrets.WORKER1_PRIVATE_KEY }}"
+          ssh-add - <<< "${{ secrets.WORKER2_PRIVATE_KEY }}"
 
       - name: Run Ansible Playbook
         working-directory: ansible/deploy-swarm
