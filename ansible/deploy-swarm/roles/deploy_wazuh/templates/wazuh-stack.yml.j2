@@ -1,0 +1,94 @@
+version: '3.8'
+
+networks:
+  wazuh-net:
+    external: true
+
+services:
+  wazuh-manager:
+    image: wazuh/wazuh:latest
+    deploy:
+      replicas: 2
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+    networks:
+      - wazuh-net
+    volumes:
+      - /share/wazuh-manager:/var/ossec/data
+    environment:
+      - MANAGER_NODE=true
+      - ELASTIC_PASSWORD={{ elastic_password | default('changeme') }}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:55000 || exit 1"]
+      interval: 10s
+      retries: 10
+      timeout: 5s
+      start_period: 30s
+
+  wazuh-indexer:
+    image: wazuh/wazuh-indexer:latest
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+    networks:
+      - wazuh-net
+    volumes:
+      - /share/wazuh-indexer:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+      interval: 10s
+      retries: 10
+      timeout: 5s
+      start_period: 30s
+
+  wazuh-dashboard:
+    image: wazuh/wazuh-dashboard:latest
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+    networks:
+      - wazuh-net
+    volumes:
+      - /share/wazuh-dashboard:/usr/share/wazuh-dashboard/data
+      - /share/certs:/etc/nginx/certs:ro
+    environment:
+      - WAZUH_MANAGER_IPS=10.10.2.4,10.10.2.5,10.10.2.6
+    ports:
+      - "443:443"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f https://localhost --insecure || exit 1"]
+      interval: 10s
+      retries: 10
+      timeout: 5s
+      start_period: 30s
+
+  wazuh-nginx:
+    image: nginx:alpine
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "443:443"
+    volumes:
+      - /share/certs:/etc/nginx/certs:ro
+      - /share/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - wazuh-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f https://localhost --insecure || exit 1"]
+      interval: 10s
+      retries: 10
+      timeout: 5s
+      start_period: 30s
+
