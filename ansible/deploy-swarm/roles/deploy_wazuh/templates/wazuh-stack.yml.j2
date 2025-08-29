@@ -1,94 +1,144 @@
-version: '3.8'
-
-networks:
-  wazuh-net:
-    external: true
+version: "3.9"
 
 services:
-  wazuh-manager:
-    image: wazuh/wazuh:latest
-    deploy:
-      replicas: 2
-      placement:
-        constraints:
-          - node.role == manager
-      restart_policy:
-        condition: on-failure
-    networks:
-      - wazuh-net
-    volumes:
-      - /share/wazuh-manager:/var/ossec/data
-    environment:
-      - MANAGER_NODE=true
-      - ELASTIC_PASSWORD={{ elastic_password | default('changeme') }}
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:55000 || exit 1"]
-      interval: 10s
-      retries: 10
-      timeout: 5s
-      start_period: 30s
-
-  wazuh-indexer:
-    image: wazuh/wazuh-indexer:latest
-    deploy:
-      replicas: 2
-      restart_policy:
-        condition: on-failure
-    networks:
-      - wazuh-net
-    volumes:
-      - /share/wazuh-indexer:/usr/share/elasticsearch/data
-    environment:
-      - discovery.type=single-node
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
-      interval: 10s
-      retries: 10
-      timeout: 5s
-      start_period: 30s
-
-  wazuh-dashboard:
-    image: wazuh/wazuh-dashboard:latest
-    deploy:
-      replicas: 2
-      restart_policy:
-        condition: on-failure
-    networks:
-      - wazuh-net
-    volumes:
-      - /share/wazuh-dashboard:/usr/share/wazuh-dashboard/data
-      - /share/certs:/etc/nginx/certs:ro
-    environment:
-      - WAZUH_MANAGER_IPS=10.10.2.4,10.10.2.5,10.10.2.6
+  ##############################
+  # WAZUH MASTER
+  ##############################
+  wazuh.master:
+    image: wazuh/wazuh:5.0.0
+    hostname: wazuh-master
+    container_name: wazuh-master
     ports:
-      - "443:443"
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f https://localhost --insecure || exit 1"]
-      interval: 10s
-      retries: 10
-      timeout: 5s
-      start_period: 30s
+      - "1515:1515"     # agent registration
+      - "55000:55000"   # Wazuh API
+      - "514/udp:514/udp" # syslog
+    environment:
+      - NODE_TYPE=master
+      - CLUSTER_NAME=wazuh-cluster
+      - ELASTIC_URL=https://wazuh1.indexer:9200
+      - ELASTIC_USER=admin
+      - ELASTIC_PASSWORD=admin
+    volumes:
+      - /share/wazuh/manager/master/data:/var/ossec/data
+      - /share/wazuh/manager/master/logs:/var/ossec/logs
+      - /share/wazuh/manager/master/etc:/var/ossec/etc
+      - /share/wazuh/manager/certs:/etc/ssl/certs:ro
+    deploy:
+      placement:
+        constraints: [node.role == manager]
 
-  wazuh-nginx:
-    image: nginx:alpine
+  ##############################
+  # WAZUH WORKER
+  ##############################
+  wazuh.worker:
+    image: wazuh/wazuh:5.0.0
+    hostname: wazuh-worker
+    container_name: wazuh-worker
+    environment:
+      - NODE_TYPE=worker
+      - CLUSTER_NAME=wazuh-cluster
+      - ELASTIC_URL=https://wazuh1.indexer:9200
+      - ELASTIC_USER=admin
+      - ELASTIC_PASSWORD=admin
+    volumes:
+      - /share/wazuh/manager/worker/data:/var/ossec/data
+      - /share/wazuh/manager/worker/logs:/var/ossec/logs
+      - /share/wazuh/manager/worker/etc:/var/ossec/etc
+      - /share/wazuh/manager/certs:/etc/ssl/certs:ro
     deploy:
       replicas: 1
       placement:
-        constraints:
-          - node.role == manager
-      restart_policy:
-        condition: on-failure
+        constraints: [node.role == worker]
+
+  ##############################
+  # WAZUH DASHBOARD
+  ##############################
+  wazuh.dashboard:
+    image: wazuh/wazuh-dashboard:5.0.0
+    container_name: wazuh-dashboard
+    ports:
+      - "443:443"
+    environment:
+      - ELASTIC_URL=https://wazuh1.indexer:9200
+      - ELASTIC_USER=admin
+      - ELASTIC_PASSWORD=admin
+      - WAZUH_API_URL=https://wazuh.master:55000
+    volumes:
+      - /share/wazuh/dashboard/certs:/usr/share/wazuh-dashboard/certs:ro
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+  ##############################
+  # OPENSEARCH CLUSTER
+  ##############################
+  wazuh1.indexer:
+    image: wazuh/wazuh-indexer:5.0.0
+    container_name: wazuh1-indexer
+    environment:
+      - cluster.name=wazuh-indexer-cluster
+      - node.name=wazuh1
+      - discovery.seed_hosts=wazuh1.indexer,wazuh2.indexer,wazuh3.indexer
+      - cluster.initial_master_nodes=wazuh1.indexer,wazuh2.indexer,wazuh3.indexer
+      - bootstrap.memory_lock=true
+      - ELASTIC_PASSWORD=admin
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /share/wazuh/indexer/wazuh1/data:/usr/share/wazuh-indexer/data
+      - /share/wazuh/indexer/certs:/usr/share/wazuh-indexer/certs:ro
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+  wazuh2.indexer:
+    image: wazuh/wazuh-indexer:5.0.0
+    container_name: wazuh2-indexer
+    environment:
+      - cluster.name=wazuh-indexer-cluster
+      - node.name=wazuh2
+      - discovery.seed_hosts=wazuh1.indexer,wazuh2.indexer,wazuh3.indexer
+      - cluster.initial_master_nodes=wazuh1.indexer,wazuh2.indexer,wazuh3.indexer
+      - bootstrap.memory_lock=true
+      - ELASTIC_PASSWORD=admin
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /share/wazuh/indexer/wazuh2/data:/usr/share/wazuh-indexer/data
+      - /share/wazuh/indexer/certs:/usr/share/wazuh-indexer/certs:ro
+
+  wazuh3.indexer:
+    image: wazuh/wazuh-indexer:5.0.0
+    container_name: wazuh3-indexer
+    environment:
+      - cluster.name=wazuh-indexer-cluster
+      - node.name=wazuh3
+      - discovery.seed_hosts=wazuh1.indexer,wazuh2.indexer,wazuh3.indexer
+      - cluster.initial_master_nodes=wazuh1.indexer,wazuh2.indexer,wazuh3.indexer
+      - bootstrap.memory_lock=true
+      - ELASTIC_PASSWORD=admin
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /share/wazuh/indexer/wazuh3/data:/usr/share/wazuh-indexer/data
+      - /share/wazuh/indexer/certs:/usr/share/wazuh-indexer/certs:ro
+
+  ##############################
+  # NGINX REVERSE PROXY
+  ##############################
+  nginx:
+    image: nginx:latest
+    container_name: wazuh-nginx
     ports:
       - "1514:1514"
     volumes:
-      - /share/certs:/etc/nginx/certs:ro
-      - /share/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    networks:
-      - wazuh-net
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f https://localhost --insecure || exit 1"]
-      interval: 10s
-      retries: 10
-      timeout: 5s
-      start_period: 30s
-
+      - /share/wazuh/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    deploy:
+      placement:
+        constraints: [node.role == manager]
