@@ -96,7 +96,7 @@ services:
   wazuh-manager:
     image: wazuh/wazuh-manager:4.10.3
     hostname: wazuh.manager
-    user: "${UID}:${GID}"
+    
     networks:
       - wazuh-net
     deploy:
@@ -140,7 +140,7 @@ services:
   wazuh-indexer:
     image: wazuh/wazuh-indexer:4.10.3
     hostname: wazuh.indexer
-    user: "${UID}:${GID}"
+    
     networks:
       - wazuh-net
     deploy:
@@ -157,7 +157,7 @@ services:
   wazuh-dashboard:
     image: wazuh/wazuh-dashboard:4.10.3
     hostname: wazuh.dashboard
-    user: "${UID}:${GID}"
+    
     networks:
       - wazuh-net
     deploy:
@@ -179,7 +179,7 @@ services:
   wazuh-nginx:
     image: wazuh/wazuh-nginx:3.13.6_7.9.2
     hostname: wazuh.nginx
-    user: "${UID}:${GID}"
+    
     networks:
       - wazuh-net
     deploy:
