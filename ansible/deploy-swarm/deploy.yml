@@ -25,4 +25,8 @@
   roles:
     - worker_join_docker_swarm
 
-
+- name: Deploy Wazuh HA Stack
+  hosts: managers[0]
+  become: true
+  roles:
+    - deploy_wazuh
