@@ -1,5 +1,9 @@
 version: "3.9"
 
+networks:
+  wazuh-net:
+    external: true
+
 services:
   ##############################
   # WAZUH MASTER
@@ -9,9 +13,18 @@ services:
     hostname: wazuh-master
     container_name: wazuh-master
     ports:
-      - "1515:1515"     # agent registration
-      - "55000:55000"   # Wazuh API
-      - "514/udp:514/udp" # syslog
+      - target: 1515
+        published: 1515
+        protocol: tcp
+        mode: host
+      - target: 55000
+        published: 55000
+        protocol: tcp
+        mode: host
+      - target: 514
+        published: 514
+        protocol: udp
+        mode: host
     environment:
       - NODE_TYPE=master
       - CLUSTER_NAME=wazuh-cluster
@@ -22,7 +35,9 @@ services:
       - /share/wazuh/manager/master/data:/var/ossec/data
       - /share/wazuh/manager/master/logs:/var/ossec/logs
       - /share/wazuh/manager/master/etc:/var/ossec/etc
-      - /share/wazuh/manager/certs:/etc/ssl/certs:ro
+      - /share/certs:/etc/ssl/certs:ro
+    networks:
+      - wazuh-net
     deploy:
       placement:
         constraints: [node.role == manager]
@@ -44,7 +59,9 @@ services:
       - /share/wazuh/manager/worker/data:/var/ossec/data
       - /share/wazuh/manager/worker/logs:/var/ossec/logs
       - /share/wazuh/manager/worker/etc:/var/ossec/etc
-      - /share/wazuh/manager/certs:/etc/ssl/certs:ro
+      - /share/certs:/etc/ssl/certs:ro
+    networks:
+      - wazuh-net
     deploy:
       replicas: 1
       placement:
@@ -57,14 +74,20 @@ services:
     image: wazuh/wazuh-dashboard:5.0.0
     container_name: wazuh-dashboard
     ports:
-      - "443:443"
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
     environment:
       - ELASTIC_URL=https://wazuh1.indexer:9200
       - ELASTIC_USER=admin
       - ELASTIC_PASSWORD=admin
       - WAZUH_API_URL=https://wazuh.master:55000
     volumes:
-      - /share/wazuh/dashboard/certs:/usr/share/wazuh-dashboard/certs:ro
+      - /share/certs:/usr/share/wazuh-dashboard/certs:ro
+      - /share/wazuh/dashboard/config:/usr/share/wazuh-dashboard/config:ro
+    networks:
+      - wazuh-net
     deploy:
       placement:
         constraints: [node.role == manager]
@@ -88,7 +111,9 @@ services:
         hard: -1
     volumes:
       - /share/wazuh/indexer/wazuh1/data:/usr/share/wazuh-indexer/data
-      - /share/wazuh/indexer/certs:/usr/share/wazuh-indexer/certs:ro
+      - /share/certs:/usr/share/wazuh-indexer/certs:ro
+    networks:
+      - wazuh-net
     deploy:
       placement:
         constraints: [node.role == manager]
@@ -109,7 +134,9 @@ services:
         hard: -1
     volumes:
       - /share/wazuh/indexer/wazuh2/data:/usr/share/wazuh-indexer/data
-      - /share/wazuh/indexer/certs:/usr/share/wazuh-indexer/certs:ro
+      - /share/certs:/usr/share/wazuh-indexer/certs:ro
+    networks:
+      - wazuh-net
 
   wazuh3.indexer:
     image: wazuh/wazuh-indexer:5.0.0
@@ -127,7 +154,9 @@ services:
         hard: -1
     volumes:
       - /share/wazuh/indexer/wazuh3/data:/usr/share/wazuh-indexer/data
-      - /share/wazuh/indexer/certs:/usr/share/wazuh-indexer/certs:ro
+      - /share/certs:/usr/share/wazuh-indexer/certs:ro
+    networks:
+      - wazuh-net
 
   ##############################
   # NGINX REVERSE PROXY
@@ -136,9 +165,15 @@ services:
     image: nginx:latest
     container_name: wazuh-nginx
     ports:
-      - "1514:1514"
+      - target: 1514
+        published: 1514
+        protocol: tcp
+        mode: host
     volumes:
-      - /share/wazuh/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /share/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /share/certs:/etc/nginx/certs:ro
+    networks:
+      - wazuh-net
     deploy:
       placement:
         constraints: [node.role == manager]
