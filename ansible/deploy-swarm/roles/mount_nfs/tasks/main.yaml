@@ -28,10 +28,4 @@
     fstype: "nfs"
     opts: "vers=4,proto=tcp,rw,nolock"
     state: mounted
-- name: Ensure Wazuh subdirectories exist with proper permissions
-  ansible.builtin.file:
-    path: "{{ mount_point }}"
-    state: directory
-    owner: 1000   # Adjust to the Docker container UID if necessary
-    group: 1000   # Adjust to the Docker container GID if necessary
-    mode: '0777'
+
