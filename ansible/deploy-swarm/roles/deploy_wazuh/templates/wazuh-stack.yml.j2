@@ -4,87 +4,88 @@ volumes:
   wazuh_manager_etc:
     driver: local
     driver_opts:
-      type: nfs
-      o: addr=10.10.1.5,rw
-      device: ":/share/wazuh/manager/etc"
+      type: "none"
+      o: "bind"
+      device: "/share/wazuh/manager/etc"
   wazuh_manager_logs:
     driver: local
     driver_opts:
-      type: nfs
-      o: addr=10.10.1.5,rw
-      device: ":/share/wazuh/manager/logs"
+      type: "none"
+      o: "bind"
+      device: "/share/wazuh/manager/logs"
   wazuh_manager_queue:
     driver: local
     driver_opts:
-      type: nfs
-      o: addr=10.10.1.5,rw
-      device: ":/share/wazuh/manager/queue"
+      type: "none"
+      o: "bind"
+      device: "/share/wazuh/manager/queue"
   wazuh_manager_api_conf:
     driver: local
     driver_opts:
-      type: nfs
-      o: addr=10.10.1.5,rw
-      device: ":/share/wazuh/manager/api-configuration"
+      type: "none"
+      o: "bind"
+      device: "/share/wazuh/manager/api-configuration"
   wazuh_manager_integrations:
     driver: local
     driver_opts:
-      type: nfs
-      o: addr=10.10.1.5,rw
-      device: ":/share/wazuh/manager/integrations"
+      type: "none"
+      o: "bind"
+      device: "/share/wazuh/manager/integrations"
   wazuh_manager_active_response:
     driver: local
     driver_opts:
-      type: nfs
-      o: addr=10.10.1.5,rw
-      device: ":/share/wazuh/manager/active-response"
+      type: "none"
+      o: "bind"
+      device: "/share/wazuh/manager/active-response"
   wazuh_manager_agentless:
     driver: local
     driver_opts:
-      type: nfs
-      o: addr=10.10.1.5,rw
-      device: ":/share/wazuh/manager/agentless"
+      type: "none"
+      o: "bind"
+      device: "/share/wazuh/manager/agentless"
   wazuh_manager_wodles:
     driver: local
     driver_opts:
-      type: nfs
-      o: addr=10.10.1.5,rw
-      device: ":/share/wazuh/manager/wodles"
+      type: "none"
+      o: "bind"
+      device: "/share/wazuh/manager/wodles"
   wazuh_manager_filebeat_etc:
     driver: local
     driver_opts:
-      type: nfs
-      o: addr=10.10.1.5,rw
-      device: ":/share/wazuh/manager/filebeat-etc"
+      type: "none"
+      o: "bind"
+      device: "/share/wazuh/manager/filebeat-etc"
   wazuh_manager_filebeat_var:
     driver: local
     driver_opts:
-      type: nfs
-      o: addr=10.10.1.5,rw
-      device: ":/share/wazuh/manager/filebeat-var"
+      type: "none"
+      o: "bind"
+      device: "/share/wazuh/manager/filebeat-var"
   wazuh_indexer_data:
     driver: local
     driver_opts:
-      type: nfs
-      o: addr=10.10.1.5,rw
-      device: ":/share/wazuh/indexer/data"
+      type: "none"
+      o: "bind"
+      device: "/share/wazuh/indexer/data"
   wazuh_dashboard_config:
     driver: local
     driver_opts:
-      type: nfs
-      o: addr=10.10.1.5,rw
-      device: ":/share/wazuh/dashboard/config"
+      type: "none"
+      o: "bind"
+      device: "/share/wazuh/dashboard/config"
   wazuh_certs:
     driver: local
     driver_opts:
-      type: nfs
-      o: addr=10.10.1.5,rw
-      device: ":/share/certs"
+      type: "none"
+      o: "bind"
+      device: "/share/certs"
   wazuh_nginx_conf:
     driver: local
     driver_opts:
-      type: nfs
-      o: addr=10.10.1.5,rw
-      device: ":/share/nginx/conf.d/default.d"
+      type: "none"
+      o: "bind"
+      device: "/share/nginx/conf.d/default.d"
+
 
 networks:
   wazuh-net:
