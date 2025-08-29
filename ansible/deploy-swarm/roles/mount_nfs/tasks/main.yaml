@@ -26,7 +26,7 @@
     path: "{{ mount_point }}"
     src: "{{ nfs_server }}:{{ nfs_share }}"
     fstype: "nfs"
-    opts: "vers=4,proto=tcp,nolock"
+    opts: "vers=4,proto=tcp,rw,nolock"
     state: mounted
 - name: Ensure Wazuh subdirectories exist with proper permissions
   ansible.builtin.file:
