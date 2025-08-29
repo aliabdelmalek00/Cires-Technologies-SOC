@@ -78,13 +78,13 @@ volumes:
     driver_opts:
       type: "none"
       o: "bind"
-      device: "/share/certs"
+      device: "/share/wazuh/certs"
   wazuh_nginx_conf:
     driver: local
     driver_opts:
       type: "none"
       o: "bind"
-      device: "/share/nginx/conf.d/default.d"
+      device: "/wazuh/share/nginx/conf.d/default.d"
 
 
 networks:
