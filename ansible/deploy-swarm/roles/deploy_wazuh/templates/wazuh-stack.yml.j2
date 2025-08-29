@@ -11,7 +11,7 @@ services:
   wazuh.master:
     image: wazuh/wazuh:5.0.0
     hostname: wazuh-master
-    container_name: wazuh-master
+    
     ports:
       - target: 1515
         published: 1515
@@ -48,7 +48,7 @@ services:
   wazuh.worker:
     image: wazuh/wazuh:5.0.0
     hostname: wazuh-worker
-    container_name: wazuh-worker
+    
     environment:
       - NODE_TYPE=worker
       - CLUSTER_NAME=wazuh-cluster
@@ -72,7 +72,7 @@ services:
   ##############################
   wazuh.dashboard:
     image: wazuh/wazuh-dashboard:5.0.0
-    container_name: wazuh-dashboard
+    
     ports:
       - target: 443
         published: 443
@@ -97,7 +97,7 @@ services:
   ##############################
   wazuh1.indexer:
     image: wazuh/wazuh-indexer:5.0.0
-    container_name: wazuh1-indexer
+    
     environment:
       - cluster.name=wazuh-indexer-cluster
       - node.name=wazuh1
@@ -120,7 +120,7 @@ services:
 
   wazuh2.indexer:
     image: wazuh/wazuh-indexer:5.0.0
-    container_name: wazuh2-indexer
+    
     environment:
       - cluster.name=wazuh-indexer-cluster
       - node.name=wazuh2
@@ -140,7 +140,7 @@ services:
 
   wazuh3.indexer:
     image: wazuh/wazuh-indexer:5.0.0
-    container_name: wazuh3-indexer
+    
     environment:
       - cluster.name=wazuh-indexer-cluster
       - node.name=wazuh3
@@ -163,7 +163,7 @@ services:
   ##############################
   nginx:
     image: nginx:latest
-    container_name: wazuh-nginx
+    
     ports:
       - target: 1514
         published: 1514
