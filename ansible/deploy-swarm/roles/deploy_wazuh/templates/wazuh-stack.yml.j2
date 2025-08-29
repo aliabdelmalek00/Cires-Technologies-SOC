@@ -93,7 +93,7 @@ networks:
 services:
 
   wazuh-manager:
-    image: wazuh/wazuh-manager:4.7.4
+    image: wazuh/wazuh-manager:4.10.3
     hostname: wazuh.manager
     networks:
       - wazuh-net
@@ -136,7 +136,7 @@ services:
       - wazuh_certs:/etc/ssl
 
   wazuh-indexer:
-    image: wazuh/wazuh-indexer:4.10.1
+    image: wazuh/wazuh-indexer:4.10.3
     hostname: wazuh.indexer
     networks:
       - wazuh-net
@@ -152,7 +152,7 @@ services:
       - wazuh_indexer_data:/usr/share/elasticsearch/data
 
   wazuh-dashboard:
-    image: wazuh/wazuh-dashboard:4.10.2
+    image: wazuh/wazuh-dashboard:4.10.3
     hostname: wazuh.dashboard
     networks:
       - wazuh-net
@@ -173,7 +173,7 @@ services:
       - wazuh_certs:/etc/ssl
 
   wazuh-nginx:
-    image: wazuh/wazuh-nginx:latest
+    image: wazuh/wazuh-nginx:3.13.6_7.9.2
     hostname: wazuh.nginx
     networks:
       - wazuh-net
