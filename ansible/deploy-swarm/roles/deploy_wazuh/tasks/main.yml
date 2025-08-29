@@ -1,4 +1,15 @@
 ---
+- name: Remove old Wazuh Docker volumes
+  community.docker.docker_volume:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - wazuh_manager_etc
+    - wazuh_manager_integrations
+    - wazuh_manager_api_conf
+    - wazuh_indexer_data
+    - wazuh_dashboard_data
+    
 - name: Ensure NFS volume is mounted
   ansible.builtin.mount:
     path: /share
@@ -46,6 +57,7 @@
     volumes:
       - /share/wazuh/certs:/etc/nginx/certs:ro
       - /share/wazuh/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
 
 
 
