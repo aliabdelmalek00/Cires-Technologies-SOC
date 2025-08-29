@@ -24,14 +24,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install ansible
 
-      - name: Start SSH agent and add all keys
+      - name: Test connectivity to target VMs
         run: |
-          eval "$(ssh-agent -s)"
-          ssh-add - <<< "${{ secrets.MANAGER1_PRIVATE_KEY }}"
-          ssh-add - <<< "${{ secrets.MANAGER2_PRIVATE_KEY }}"
-          ssh-add - <<< "${{ secrets.MANAGER3_PRIVATE_KEY }}"
-          ssh-add - <<< "${{ secrets.WORKER1_PRIVATE_KEY }}"
-          ssh-add - <<< "${{ secrets.WORKER2_PRIVATE_KEY }}"
+          ansible all -i all -m ping
 
       - name: Run Ansible Playbook
         working-directory: ansible/deploy-swarm
