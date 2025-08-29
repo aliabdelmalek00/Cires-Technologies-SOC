@@ -18,12 +18,12 @@
     opts: rw,sync
     state: mounted
     
-- name: Ensure Wazuh host directories exist
+- name: Ensure Wazuh directories exist with correct permissions
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    owner: root
-    group: root
+    owner: 1000
+    group: 1000
     mode: '0755'
   loop:
     - /share/wazuh/manager/etc
@@ -39,7 +39,7 @@
     - /share/wazuh/indexer/data
     - /share/wazuh/dashboard/config
     - /share/wazuh/certs
-    - /wazuh/share/nginx/conf.d
+
 
 
 - name: Create Docker overlay network
@@ -81,6 +81,7 @@
     volumes:
       - /share/wazuh/certs:/etc/nginx/certs:ro
       - /share/wazuh/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
 
 
 
