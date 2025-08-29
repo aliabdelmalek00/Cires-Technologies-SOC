@@ -1,11 +1,90 @@
 version: "3.9"
+
 volumes:
-  wazuh_data:
+  wazuh_manager_etc:
     driver: local
     driver_opts:
       type: nfs
       o: addr=10.10.1.5,rw
-      device: ":/srv/nfs"
+      device: ":/share/wazuh/manager/etc"
+  wazuh_manager_logs:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.10.1.5,rw
+      device: ":/share/wazuh/manager/logs"
+  wazuh_manager_queue:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.10.1.5,rw
+      device: ":/share/wazuh/manager/queue"
+  wazuh_manager_api_conf:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.10.1.5,rw
+      device: ":/share/wazuh/manager/api-configuration"
+  wazuh_manager_integrations:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.10.1.5,rw
+      device: ":/share/wazuh/manager/integrations"
+  wazuh_manager_active_response:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.10.1.5,rw
+      device: ":/share/wazuh/manager/active-response"
+  wazuh_manager_agentless:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.10.1.5,rw
+      device: ":/share/wazuh/manager/agentless"
+  wazuh_manager_wodles:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.10.1.5,rw
+      device: ":/share/wazuh/manager/wodles"
+  wazuh_manager_filebeat_etc:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.10.1.5,rw
+      device: ":/share/wazuh/manager/filebeat-etc"
+  wazuh_manager_filebeat_var:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.10.1.5,rw
+      device: ":/share/wazuh/manager/filebeat-var"
+  wazuh_indexer_data:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.10.1.5,rw
+      device: ":/share/wazuh/indexer/data"
+  wazuh_dashboard_config:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.10.1.5,rw
+      device: ":/share/wazuh/dashboard/config"
+  wazuh_certs:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.10.1.5,rw
+      device: ":/share/certs"
+  wazuh_nginx_conf:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.10.1.5,rw
+      device: ":/share/nginx/conf.d/default.d"
 
 networks:
   wazuh-net:
@@ -44,19 +123,17 @@ services:
       - API_USERNAME=wazuh-wui
       - API_PASSWORD=MyS3cr37P450r.*-
     volumes:
-      - /share/wazuh/manager/etc:/var/ossec/etc
-      - /share/wazuh/manager/logs:/var/ossec/logs
-      - /share/wazuh/manager/queue:/var/ossec/queue
-      - /share/wazuh/manager/api-configuration:/var/ossec/api/configuration
-      - /share/wazuh/manager/integrations:/var/ossec/integrations
-      - /share/wazuh/manager/active-response:/var/ossec/active-response/bin
-      - /share/wazuh/manager/agentless:/var/ossec/agentless
-      - /share/wazuh/manager/wodles:/var/ossec/wodles
-      - /share/wazuh/manager/filebeat-etc:/etc/filebeat
-      - /share/wazuh/manager/filebeat-var:/var/lib/filebeat
-      - /share/certs/wazuh.crt:/etc/ssl/wazuh.crt
-      - /share/certs/wazuh.key:/etc/ssl/wazuh.key
-      - /share/certs/root-ca.pem:/etc/ssl/root-ca.pem
+      - wazuh_manager_etc:/var/ossec/etc
+      - wazuh_manager_logs:/var/ossec/logs
+      - wazuh_manager_queue:/var/ossec/queue
+      - wazuh_manager_api_conf:/var/ossec/api/configuration
+      - wazuh_manager_integrations:/var/ossec/integrations
+      - wazuh_manager_active_response:/var/ossec/active-response/bin
+      - wazuh_manager_agentless:/var/ossec/agentless
+      - wazuh_manager_wodles:/var/ossec/wodles
+      - wazuh_manager_filebeat_etc:/etc/filebeat
+      - wazuh_manager_filebeat_var:/var/lib/filebeat
+      - wazuh_certs:/etc/ssl
 
   wazuh-indexer:
     image: wazuh/wazuh-indexer:latest
@@ -72,7 +149,7 @@ services:
       - discovery.seed_hosts=wazuh1.indexer,wazuh2.indexer
       - cluster.initial_master_nodes=wazuh1.indexer,wazuh2.indexer
     volumes:
-      - /share/wazuh/indexer/data:/usr/share/elasticsearch/data
+      - wazuh_indexer_data:/usr/share/elasticsearch/data
 
   wazuh-dashboard:
     image: wazuh/wazuh-dashboard:latest
@@ -92,10 +169,8 @@ services:
       - SSL_KEY=/etc/ssl/wazuh.key
       - SSL_CERTIFICATE_AUTHORITIES=/etc/ssl/root-ca.pem
     volumes:
-      - /share/wazuh/dashboard/config:/usr/share/kibana/config
-      - /share/certs/wazuh.crt:/etc/ssl/wazuh.crt
-      - /share/certs/wazuh.key:/etc/ssl/wazuh.key
-      - /share/certs/root-ca.pem:/etc/ssl/root-ca.pem
+      - wazuh_dashboard_config:/usr/share/kibana/config
+      - wazuh_certs:/etc/ssl
 
   wazuh-nginx:
     image: wazuh/wazuh-nginx:latest
@@ -109,6 +184,5 @@ services:
       - "443:443"
       - "80:80"
     volumes:
-      - /share/nginx/conf.d/default.d:/etc/nginx/conf.d/default.d:ro
-      - /share/certs/wazuh.crt:/etc/ssl/wazuh.crt
-      - /share/certs/wazuh.key:/etc/ssl/wazuh.key
+      - wazuh_nginx_conf:/etc/nginx/conf.d/default.d:ro
+      - wazuh_certs:/etc/ssl
