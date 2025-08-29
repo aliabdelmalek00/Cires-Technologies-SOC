@@ -17,6 +17,30 @@
     fstype: nfs
     opts: rw,sync
     state: mounted
+    
+- name: Ensure Wazuh host directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - /share/wazuh/manager/etc
+    - /share/wazuh/manager/logs
+    - /share/wazuh/manager/queue
+    - /share/wazuh/manager/api-configuration
+    - /share/wazuh/manager/integrations
+    - /share/wazuh/manager/active-response
+    - /share/wazuh/manager/agentless
+    - /share/wazuh/manager/wodles
+    - /share/wazuh/manager/filebeat-etc
+    - /share/wazuh/manager/filebeat-var
+    - /share/wazuh/indexer/data
+    - /share/wazuh/dashboard/config
+    - /share/wazuh/certs
+    - /wazuh/share/nginx/conf.d
+
 
 - name: Create Docker overlay network
   community.docker.docker_network:
@@ -57,6 +81,7 @@
     volumes:
       - /share/wazuh/certs:/etc/nginx/certs:ro
       - /share/wazuh/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
 
 
 
