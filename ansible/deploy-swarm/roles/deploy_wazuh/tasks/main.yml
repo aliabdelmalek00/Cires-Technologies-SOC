@@ -32,7 +32,7 @@
     host: "{{ inventory_hostname }}"
     port: 443
     delay: 10
-    timeout: 300
+    timeout: 600
     state: started
 
 - name: Deploy Nginx reverse proxy
@@ -46,6 +46,7 @@
     volumes:
       - /share/certs:/etc/nginx/certs:ro
       - /share/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
 
 
 
