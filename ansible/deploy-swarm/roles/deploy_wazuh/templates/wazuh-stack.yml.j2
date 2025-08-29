@@ -136,22 +136,29 @@ services:
       - /share/wazuh/certs:/etc/ssl
 
   wazuh-indexer:
-    image: wazuh/wazuh-indexer:4.10.3
-    hostname: wazuh.indexer
-    
-    networks:
-      - wazuh-net
-    deploy:
-      mode: replicated
-      replicas: 2
-    environment:
-      - cluster.name=wazuh-cluster
-      - node.name=wazuh-indexer
-      - discovery.seed_hosts=wazuh1.indexer,wazuh2.indexer
-      - cluster.initial_master_nodes=wazuh1.indexer,wazuh2.indexer
-    volumes:
-      - /share/wazuh/indexer/data:/usr/share/elasticsearch/data
+  image: wazuh/wazuh-indexer:4.10.3
+  hostname: wazuh.indexer
 
+  networks:
+    - wazuh-net
+  deploy:
+    mode: replicated
+    replicas: 2
+  environment:
+    - cluster.name=wazuh-cluster
+    - node.name=wazuh-indexer
+    - discovery.seed_hosts=wazuh1.indexer,wazuh2.indexer
+    - cluster.initial_master_nodes=wazuh1.indexer,wazuh2.indexer
+    - ELASTICSEARCH_USERNAME=admin
+    - ELASTICSEARCH_PASSWORD=SecretPassword
+    - xpack.security.enabled=true
+    - xpack.security.http.ssl.enabled=true
+    - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/wazuh.key
+    - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certs/wazuh.crt
+    - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/root-ca.pem
+  volumes:
+    - /share/wazuh/indexer/data:/usr/share/elasticsearch/data
+    - /share/wazuh/certs:/usr/share/elasticsearch/config/certs
   wazuh-dashboard:
     image: wazuh/wazuh-dashboard:4.10.3
     hostname: wazuh.dashboard
