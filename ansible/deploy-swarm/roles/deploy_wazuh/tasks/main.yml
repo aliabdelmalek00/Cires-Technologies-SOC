@@ -14,12 +14,17 @@
     attachable: yes
     state: present
 
+- name: Render Wazuh stack template
+  ansible.builtin.template:
+    src: roles/deploy_wazuh/templates/wazuh-stack.yml.j2
+    dest: /tmp/wazuh-stack.yml
+
 - name: Deploy Wazuh stack
   community.docker.docker_stack:
     name: wazuh
     state: present
     compose:
-      - "{{ playbook_dir }}/roles/deploy_wazuh/templates/wazuh-stack.yml.j2"
+      - /tmp/wazuh-stack.yml
   register: wazuh_stack
 
 - name: Wait for Wazuh services to be healthy
@@ -41,6 +46,7 @@
     volumes:
       - /share/certs:/etc/nginx/certs:ro
       - /share/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
 
 
 
