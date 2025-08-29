@@ -125,17 +125,16 @@ services:
       - API_USERNAME=wazuh-wui
       - API_PASSWORD=MyS3cr37P450r.*-
     volumes:
-      - wazuh_manager_etc:/var/ossec/etc
-      - wazuh_manager_logs:/var/ossec/logs
-      - wazuh_manager_queue:/var/ossec/queue
-      - wazuh_manager_api_conf:/var/ossec/api/configuration
-      - wazuh_manager_integrations:/var/ossec/integrations
-      - wazuh_manager_active_response:/var/ossec/active-response/bin
-      - wazuh_manager_agentless:/var/ossec/agentless
-      - wazuh_manager_wodles:/var/ossec/wodles
-      - wazuh_manager_filebeat_etc:/etc/filebeat
-      - wazuh_manager_filebeat_var:/var/lib/filebeat
-      - wazuh_certs:/etc/ssl
+      - /share/wazuh/manager/etc:/var/ossec/etc
+      - /share/wazuh/manager/logs:/var/ossec/logs
+      - /share/wazuh/manager/queue:/var/ossec/queue
+      - /share/wazuh/manager/integrations:/var/ossec/integrations
+      - /share/wazuh/manager/active-response/bin:/var/ossec/active-response/bin
+      - /share/wazuh/manager/agentless:/var/ossec/agentless
+      - /share/wazuh/manager/wodles:/var/ossec/wodles
+      - /share/wazuh/manager/filebeat-etc:/etc/filebeat
+      - /share/wazuh/manager/filebeat-var:/var/lib/filebeat
+      - /share/wazuh/certs:/etc/ssl
 
   wazuh-indexer:
     image: wazuh/wazuh-indexer:4.10.3
@@ -152,7 +151,7 @@ services:
       - discovery.seed_hosts=wazuh1.indexer,wazuh2.indexer
       - cluster.initial_master_nodes=wazuh1.indexer,wazuh2.indexer
     volumes:
-      - wazuh_indexer_data:/usr/share/elasticsearch/data
+      - /share/wazuh/indexer/data:/usr/share/elasticsearch/data
 
   wazuh-dashboard:
     image: wazuh/wazuh-dashboard:4.10.3
@@ -173,8 +172,8 @@ services:
       - SSL_KEY=/etc/ssl/wazuh.key
       - SSL_CERTIFICATE_AUTHORITIES=/etc/ssl/root-ca.pem
     volumes:
-      - wazuh_dashboard_config:/usr/share/kibana/config
-      - wazuh_certs:/etc/ssl
+      - /share/wazuh/dashboard/config:/usr/share/kibana/config
+      - /share/wazuh/certs:/etc/ssl
 
   wazuh-nginx:
     image: wazuh/wazuh-nginx:3.13.6_7.9.2
@@ -189,5 +188,5 @@ services:
       - "443:443"
       - "80:80"
     volumes:
-      - wazuh_nginx_conf:/etc/nginx/conf.d/default.d:ro
-      - wazuh_certs:/etc/ssl
+      - /share/wazuh/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - /share/wazuh/certs:/etc/ssl
