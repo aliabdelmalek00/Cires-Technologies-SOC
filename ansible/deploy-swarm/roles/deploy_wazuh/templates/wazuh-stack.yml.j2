@@ -8,10 +8,9 @@ services:
   ##############################
   # WAZUH MASTER
   ##############################
-  wazuh.master:
+  wazuh-master:
     image: wazuh/wazuh:5.0.0
     hostname: wazuh-master
-    
     ports:
       - target: 1515
         published: 1515
@@ -28,7 +27,7 @@ services:
     environment:
       - NODE_TYPE=master
       - CLUSTER_NAME=wazuh-cluster
-      - ELASTIC_URL=https://wazuh1.indexer:9200
+      - ELASTIC_URL=https://wazuh1-indexer:9200
       - ELASTIC_USER=admin
       - ELASTIC_PASSWORD=admin
     volumes:
@@ -45,14 +44,13 @@ services:
   ##############################
   # WAZUH WORKER
   ##############################
-  wazuh.worker:
+  wazuh-worker:
     image: wazuh/wazuh:5.0.0
     hostname: wazuh-worker
-    
     environment:
       - NODE_TYPE=worker
       - CLUSTER_NAME=wazuh-cluster
-      - ELASTIC_URL=https://wazuh1.indexer:9200
+      - ELASTIC_URL=https://wazuh1-indexer:9200
       - ELASTIC_USER=admin
       - ELASTIC_PASSWORD=admin
     volumes:
@@ -70,19 +68,18 @@ services:
   ##############################
   # WAZUH DASHBOARD
   ##############################
-  wazuh.dashboard:
+  wazuh-dashboard:
     image: wazuh/wazuh-dashboard:5.0.0
-    
     ports:
       - target: 443
         published: 443
         protocol: tcp
         mode: host
     environment:
-      - ELASTIC_URL=https://wazuh1.indexer:9200
+      - ELASTIC_URL=https://wazuh1-indexer:9200
       - ELASTIC_USER=admin
       - ELASTIC_PASSWORD=admin
-      - WAZUH_API_URL=https://wazuh.master:55000
+      - WAZUH_API_URL=https://wazuh-master:55000
     volumes:
       - /share/certs:/usr/share/wazuh-dashboard/certs:ro
       - /share/wazuh/dashboard/config:/usr/share/wazuh-dashboard/config:ro
@@ -95,14 +92,13 @@ services:
   ##############################
   # OPENSEARCH CLUSTER
   ##############################
-  wazuh1.indexer:
+  wazuh1-indexer:
     image: wazuh/wazuh-indexer:5.0.0
-    
     environment:
       - cluster.name=wazuh-indexer-cluster
       - node.name=wazuh1
-      - discovery.seed_hosts=wazuh1.indexer,wazuh2.indexer,wazuh3.indexer
-      - cluster.initial_master_nodes=wazuh1.indexer,wazuh2.indexer,wazuh3.indexer
+      - discovery.seed_hosts=wazuh1-indexer,wazuh2-indexer,wazuh3-indexer
+      - cluster.initial_master_nodes=wazuh1-indexer,wazuh2-indexer,wazuh3-indexer
       - bootstrap.memory_lock=true
       - ELASTIC_PASSWORD=admin
     ulimits:
@@ -118,14 +114,13 @@ services:
       placement:
         constraints: [node.role == manager]
 
-  wazuh2.indexer:
+  wazuh2-indexer:
     image: wazuh/wazuh-indexer:5.0.0
-    
     environment:
       - cluster.name=wazuh-indexer-cluster
       - node.name=wazuh2
-      - discovery.seed_hosts=wazuh1.indexer,wazuh2.indexer,wazuh3.indexer
-      - cluster.initial_master_nodes=wazuh1.indexer,wazuh2.indexer,wazuh3.indexer
+      - discovery.seed_hosts=wazuh1-indexer,wazuh2-indexer,wazuh3-indexer
+      - cluster.initial_master_nodes=wazuh1-indexer,wazuh2-indexer,wazuh3-indexer
       - bootstrap.memory_lock=true
       - ELASTIC_PASSWORD=admin
     ulimits:
@@ -138,14 +133,13 @@ services:
     networks:
       - wazuh-net
 
-  wazuh3.indexer:
+  wazuh3-indexer:
     image: wazuh/wazuh-indexer:5.0.0
-    
     environment:
       - cluster.name=wazuh-indexer-cluster
       - node.name=wazuh3
-      - discovery.seed_hosts=wazuh1.indexer,wazuh2.indexer,wazuh3.indexer
-      - cluster.initial_master_nodes=wazuh1.indexer,wazuh2.indexer,wazuh3.indexer
+      - discovery.seed_hosts=wazuh1-indexer,wazuh2-indexer,wazuh3-indexer
+      - cluster.initial_master_nodes=wazuh1-indexer,wazuh2-indexer,wazuh3-indexer
       - bootstrap.memory_lock=true
       - ELASTIC_PASSWORD=admin
     ulimits:
@@ -161,9 +155,8 @@ services:
   ##############################
   # NGINX REVERSE PROXY
   ##############################
-  nginx:
+  wazuh-nginx:
     image: nginx:latest
-    
     ports:
       - target: 1514
         published: 1514
