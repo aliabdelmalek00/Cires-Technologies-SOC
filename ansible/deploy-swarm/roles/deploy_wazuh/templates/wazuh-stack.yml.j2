@@ -1,4 +1,11 @@
 version: "3.9"
+volumes:
+  wazuh_data:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=10.10.1.5,rw
+      device: ":/srv/nfs"
 
 networks:
   wazuh-net:
