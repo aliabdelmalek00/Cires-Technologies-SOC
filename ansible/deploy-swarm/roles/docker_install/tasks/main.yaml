@@ -18,6 +18,17 @@
   ansible.builtin.apt_repository:
     repo: "{{ docker_apt_repository }}"
     state: present
+    
+- name: Ensure python3-pip is installed
+  ansible.builtin.apt:
+    name: python3-pip
+    state: present
+    update_cache: true
+
+- name: Install jsondiff using pip
+  ansible.builtin.pip:
+    name: jsondiff
+    executable: pip3
 
 - name: Install Docker CE
   ansible.builtin.apt:
