@@ -19,7 +19,7 @@
     name: wazuh
     state: present
     compose:
-      - "{{ playbook_dir }}/roles/wazuh_setup/templates/wazuh-stack.yml.j2"
+      - "{{ playbook_dir }}/roles/deploy_wazuh/templates/wazuh-stack.yml.j2"
   register: wazuh_stack
 
 - name: Wait for Wazuh services to be healthy
@@ -41,5 +41,6 @@
     volumes:
       - /share/certs:/etc/nginx/certs:ro
       - /share/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
 
 
