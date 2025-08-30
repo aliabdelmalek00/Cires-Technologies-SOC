@@ -121,7 +121,7 @@ services:
     ports:
       - "9200:9200"
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g"
       - "bootstrap.memory_lock=true"
     ulimits:
       memlock:
@@ -153,7 +153,7 @@ services:
     networks:
       - wazuh-net
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g"
       - "bootstrap.memory_lock=true"
     volumes:
       - /share/wazuh/indexer2:/var/lib/wazuh-indexer
@@ -179,7 +179,7 @@ services:
     networks:
       - wazuh-net
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g"
       - "bootstrap.memory_lock=true"
     volumes:
       - /share/wazuh/indexer3:/var/lib/wazuh-indexer
