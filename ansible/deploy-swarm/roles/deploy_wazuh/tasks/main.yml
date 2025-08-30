@@ -65,7 +65,7 @@
     dest: /tmp/docker-compose.yml
 
 - name: Deploy Wazuh stack with Docker Compose
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: /tmp
     files:
       - docker-compose.yml
@@ -83,6 +83,7 @@
     delay: 10
     timeout: 600
     state: started
+
 
 
 
