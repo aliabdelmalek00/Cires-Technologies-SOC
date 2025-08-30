@@ -113,7 +113,32 @@ services:
       restart_policy:
         condition: any
 
-  
+  wazuh1-indexer:
+    image: wazuh/wazuh-indexer:4.13.0-beta2
+    user: 1000:1000
+    networks:
+      - wazuh-net
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g"
+      - "bootstrap.memory_lock=true"
+    volumes:
+      - /share/wazuh/indexer2:/var/lib/wazuh-indexer
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/root-ca.pem:/usr/share/wazuh-indexer/config/certs/root-ca.pem
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh1-indexer-key.pem:/usr/share/wazuh-indexer/config/certs/wazuh2.indexer.key
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh1-indexer.pem:/usr/share/wazuh-indexer/config/certs/wazuh2.indexer.pem
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh1-indexer.pem:/etc/wazuh-indexer/certs/indexer.pem
+      - /share/wazuh/config/wazuh_indexer/wazuh2.indexer.yml:/usr/share/wazuh-indexer/config/opensearch.yml
+      - /share/wazuh/config/wazuh_indexer/internal_users.yml:/usr/share/wazuh-indexer/config/opensearch-security/internal_users.yml
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.wazuh2-indexer.rule=Host(`wazuh1.indexer`)"
+        - "traefik.http.routers.wazuh2-indexer.entrypoints=websecure"
+        - "traefik.http.routers.wazuh2-indexer.tls.certresolver=le"
+      restart_policy:
+        condition: any
 
   wazuh2-indexer:
     image: wazuh/wazuh-indexer:4.13.0-beta2
