@@ -124,7 +124,6 @@ services:
       - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g"
       - "bootstrap.memory_lock=true"
       - "cluster.name=wazuh-cluster"
-      - 
       - "JAVA_TOOL_OPTIONS=-Djava.security.policy=/usr/share/wazuh-indexer/indexer.policy"
     volumes:
       - /share/wazuh/indexer2:/var/lib/wazuh-indexer
