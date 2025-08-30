@@ -70,8 +70,8 @@
     files:
       - wazuh-stack.yml
     state: present
-    pull: yes            # optional: pulls latest images
-    recreate: yes        # optional: recreate containers if config changes
+    pull: always
+    recreate: yes
   environment:
     UID: "{{ ansible_user_uid }}"
     GID: "{{ ansible_user_gid }}"
@@ -84,6 +84,7 @@
     delay: 10
     timeout: 600
     state: started
+
 
 
 
