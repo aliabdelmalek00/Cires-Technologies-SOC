@@ -15,7 +15,7 @@
         - ca-certificates
         - curl
         - gnupg
-    - lsb-release
+        - lsb-release
 
     - name: Add Docker GPG key
       apt_key:
