@@ -27,6 +27,13 @@
     attachable: yes
     state: present
 
+- name: Define Wazuh Indexer nodes
+  set_fact:
+    indexer_nodes:
+      - { name: "wazuh1-indexer", volume: "/share/wazuh/indexer1" }
+      - { name: "wazuh2-indexer", volume: "/share/wazuh/indexer2" }
+      - { name: "wazuh3-indexer", volume: "/share/wazuh/indexer3" }
+  
 - name: Ensure build directories exist for each Indexer
   ansible.builtin.file:
     path: "/share/{{ item.name }}"
@@ -87,6 +94,7 @@
       - "1519:1519"
     volumes:
       - /share/wazuh/config/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
 
 
 
