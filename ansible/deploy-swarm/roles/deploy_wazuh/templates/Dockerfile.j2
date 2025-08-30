@@ -1,0 +1,4 @@
+FROM wazuh/wazuh-indexer:4.13.0-beta2
+COPY /share/wazuh/config/wazuh_indexer_ssl_certs /usr/share/wazuh-indexer/config/certs
+RUN chmod 640 /usr/share/wazuh-indexer/config/certs/*.pem && \
+    chmod 600 /usr/share/wazuh-indexer/config/certs/*-key.pem
