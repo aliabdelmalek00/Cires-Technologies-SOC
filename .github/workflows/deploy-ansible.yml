@@ -30,4 +30,4 @@ jobs:
       - name: Run Ansible Playbook
         working-directory: ansible/deploy-swarm
         run: |
-          ansible-playbook -i inventory/inventory.yaml deploy.yml
+          ansible-playbook -i inventory/inventory.yaml deployKube.yml
