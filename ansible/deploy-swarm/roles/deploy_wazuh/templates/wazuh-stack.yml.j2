@@ -200,11 +200,9 @@ services:
     image: wazuh/wazuh-dashboard:4.10.3
     networks:
       - wazuh-net
-    ports:
-      - 443:5601
     environment:
       - OPENSEARCH_HOSTS="https://wazuh1.indexer:9200"
-      - WAZUH_API_URL="https://wazuh.master"
+      - WAZUH_API_URL="https://wazuh.master:55000"
       - API_USERNAME=wazuh-wui
       - API_PASSWORD=MyS3cr37P450r.*-
       - DASHBOARD_USERNAME=kibanaserver
