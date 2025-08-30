@@ -115,7 +115,7 @@ services:
 
   wazuh1-indexer:
     image: wazuh/wazuh-indexer:4.13.0-beta2
-    user: 1000:1000
+    user: "0:0"
     networks:
       - wazuh-net
     ports:
