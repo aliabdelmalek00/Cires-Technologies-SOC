@@ -34,6 +34,15 @@
       - { name: "wazuh2-indexer", volume: "/share/wazuh/indexer2" }
       - { name: "wazuh3-indexer", volume: "/share/wazuh/indexer3" }
 
+- name: Ensure build directories exist for each Indexer
+  ansible.builtin.file:
+    path: "/tmp/{{ item.name }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ indexer_nodes }}"
+  loop_control:
+    label: "{{ item.name }}"
+
 - name: Create Dockerfile for each Indexer
   ansible.builtin.copy:
     dest: "/tmp/{{ item.name }}/Dockerfile"
@@ -101,6 +110,7 @@
       - "1519:1519"
     volumes:
       - /share/wazuh/config/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
 
 
 
