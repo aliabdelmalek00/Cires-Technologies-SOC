@@ -1,115 +1,15 @@
 version: "3.9"
 
-volumes:
-  wazuh_manager_etc:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/share/wazuh/manager/etc"
-  wazuh_manager_logs:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/share/wazuh/manager/logs"
-  wazuh_manager_queue:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/share/wazuh/manager/queue"
-  wazuh_manager_api_conf:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/share/wazuh/manager/api-configuration"
-  wazuh_manager_integrations:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/share/wazuh/manager/integrations"
-  wazuh_manager_active_response:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/share/wazuh/manager/active-response"
-  wazuh_manager_agentless:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/share/wazuh/manager/agentless"
-  wazuh_manager_wodles:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/share/wazuh/manager/wodles"
-  wazuh_manager_filebeat_etc:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/share/wazuh/manager/filebeat-etc"
-  wazuh_manager_filebeat_var:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/share/wazuh/manager/filebeat-var"
-  wazuh_indexer_data:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/share/wazuh/indexer/data"
-  wazuh_dashboard_config:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/share/wazuh/dashboard/config"
-  wazuh_certs:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/share/wazuh/certs"
-  wazuh_nginx_conf:
-    driver: local
-    driver_opts:
-      type: "none"
-      o: "bind"
-      device: "/share/wazuh/nginx/conf.d/default.conf"
-
-
 networks:
   wazuh-net:
-    external: true
+    driver: overlay
+    attachable: true
 
 services:
-
-  wazuh-manager:
+  wazuh.master:
     image: wazuh/wazuh-manager:4.10.3
-    hostname: wazuh.manager
-    
     networks:
       - wazuh-net
-    deploy:
-      mode: replicated
-      replicas: 2
-    restart: always
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 655360
-        hard: 655360
     ports:
       - "1515:1515"
       - "514:514/udp"
@@ -120,11 +20,12 @@ services:
       - INDEXER_PASSWORD=SecretPassword
       - FILEBEAT_SSL_VERIFICATION_MODE=full
       - SSL_CERTIFICATE_AUTHORITIES=/etc/ssl/root-ca.pem
-      - SSL_CERTIFICATE=/etc/ssl/wazuh.crt
-      - SSL_KEY=/etc/ssl/wazuh.key
+      - SSL_CERTIFICATE=/etc/ssl/filebeat.pem
+      - SSL_KEY=/etc/ssl/filebeat.key
       - API_USERNAME=wazuh-wui
       - API_PASSWORD=MyS3cr37P450r.*-
     volumes:
+      - /share/wazuh/manager/api/configuration:/var/ossec/api/configuration
       - /share/wazuh/manager/etc:/var/ossec/etc
       - /share/wazuh/manager/logs:/var/ossec/logs
       - /share/wazuh/manager/queue:/var/ossec/queue
@@ -133,66 +34,154 @@ services:
       - /share/wazuh/manager/wodles:/var/ossec/wodles
       - /share/wazuh/manager/filebeat-etc:/etc/filebeat
       - /share/wazuh/manager/filebeat-var:/var/lib/filebeat
-      - /share/wazuh/certs:/etc/ssl
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/root-ca-manager.pem:/etc/ssl/root-ca.pem
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh.master.pem:/etc/ssl/filebeat.pem
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh.master-key.pem:/etc/ssl/filebeat.key
+      - /share/wazuh/config/wazuh_cluster/wazuh_manager.conf:/wazuh-config-mount/etc/ossec.conf
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: any
 
-  wazuh-indexer:
-    image: wazuh/wazuh-indexer:4.10.3
-    hostname: wazuh.indexer
-
+  wazuh.worker:
+    image: wazuh/wazuh-manager:4.10.3
     networks:
       - wazuh-net
-    deploy:
-      mode: replicated
-      replicas: 2
     environment:
-      - cluster.name=wazuh-cluster
-      - node.name=wazuh-indexer
-      - discovery.seed_hosts=wazuh1.indexer,wazuh2.indexer
-      - cluster.initial_master_nodes=wazuh1.indexer,wazuh2.indexer
-      - ELASTICSEARCH_USERNAME=admin
-      - ELASTICSEARCH_PASSWORD=SecretPassword
-      - xpack.security.enabled=true
-      - xpack.security.http.ssl.enabled=true
-      - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/wazuh.key
-      - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certs/wazuh.crt
-      - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/root-ca.pem
-    volumes:
-      - /share/wazuh/indexer/data:/usr/share/elasticsearch/data
-      - /share/wazuh/certs:/usr/share/elasticsearch/config/certs
-  wazuh-dashboard:
-    image: wazuh/wazuh-dashboard:4.10.3
-    hostname: wazuh.dashboard
-    
-    networks:
-      - wazuh-net
-    deploy:
-      mode: replicated
-      replicas: 1
-    ports:
-      - "5601:5601"
-    environment:
-      - ELASTICSEARCH_HOSTS=https://wazuh1.indexer:9200
-      - ELASTICSEARCH_USERNAME=admin
-      - ELASTICSEARCH_PASSWORD=SecretPassword
-      - SSL_CERTIFICATE=/etc/ssl/wazuh.crt
-      - SSL_KEY=/etc/ssl/wazuh.key
+      - INDEXER_URL=https://wazuh1.indexer:9200
+      - INDEXER_USERNAME=admin
+      - INDEXER_PASSWORD=SecretPassword
+      - FILEBEAT_SSL_VERIFICATION_MODE=full
       - SSL_CERTIFICATE_AUTHORITIES=/etc/ssl/root-ca.pem
+      - SSL_CERTIFICATE=/etc/ssl/filebeat.pem
+      - SSL_KEY=/etc/ssl/filebeat.key
     volumes:
-      - /share/wazuh/dashboard/config:/usr/share/kibana/config
-      - /share/wazuh/certs:/etc/ssl
+      - /share/wazuh/worker/api/configuration:/var/ossec/api/configuration
+      - /share/wazuh/worker/etc:/var/ossec/etc
+      - /share/wazuh/worker/logs:/var/ossec/logs
+      - /share/wazuh/worker/queue:/var/ossec/queue
+      - /share/wazuh/worker/integrations:/var/ossec/integrations
+      - /share/wazuh/worker/agentless:/var/ossec/agentless
+      - /share/wazuh/worker/wodles:/var/ossec/wodles
+      - /share/wazuh/worker/filebeat-etc:/etc/filebeat
+      - /share/wazuh/worker/filebeat-var:/var/lib/filebeat
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/root-ca-manager.pem:/etc/ssl/root-ca.pem
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh.worker.pem:/etc/ssl/filebeat.pem
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh.worker-key.pem:/etc/ssl/filebeat.key
+      - /share/wazuh/config/wazuh_cluster/wazuh_worker.conf:/wazuh-config-mount/etc/ossec.conf
+    deploy:
+      placement:
+        constraints: [node.role == worker]
+      restart_policy:
+        condition: any
 
-  wazuh-nginx:
-    image: wazuh/wazuh-nginx:3.13.6_7.9.2
-    hostname: wazuh.nginx
-    
+  wazuh1.indexer:
+    image: wazuh/wazuh-indexer:4.10.3
     networks:
       - wazuh-net
-    deploy:
-      mode: replicated
-      replicas: 1
     ports:
-      - "443:443"
-      - "80:80"
+      - "9200:9200"
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "bootstrap.memory_lock=true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     volumes:
-      - /share/wazuh/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - /share/wazuh/certs:/etc/ssl
+      - /share/wazuh/indexer:/var/lib/wazuh-indexer
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/root-ca.pem:/usr/share/wazuh-indexer/config/certs/root-ca.pem
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh1.indexer-key.pem:/usr/share/wazuh-indexer/config/certs/wazuh1.indexer.key
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh1.indexer.pem:/usr/share/wazuh-indexer/config/certs/wazuh1.indexer.pem
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/admin.pem:/usr/share/wazuh-indexer/config/certs/admin.pem
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/admin-key.pem:/usr/share/wazuh-indexer/config/certs/admin-key.pem
+      - /share/wazuh/config/wazuh_indexer/wazuh1.indexer.yml:/usr/share/wazuh-indexer/config/opensearch.yml
+      - /share/wazuh/config/wazuh_indexer/internal_users.yml:/usr/share/wazuh-indexer/config/opensearch-security/internal_users.yml
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: any
+
+  wazuh2.indexer:
+    image: wazuh/wazuh-indexer:4.10.3
+    networks:
+      - wazuh-net
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "bootstrap.memory_lock=true"
+    volumes:
+      - /share/wazuh/indexer2:/var/lib/wazuh-indexer
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/root-ca.pem:/usr/share/wazuh-indexer/config/certs/root-ca.pem
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh2.indexer-key.pem:/usr/share/wazuh-indexer/config/certs/wazuh2.indexer.key
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh2.indexer.pem:/usr/share/wazuh-indexer/config/certs/wazuh2.indexer.pem
+      - /share/wazuh/config/wazuh_indexer/wazuh2.indexer.yml:/usr/share/wazuh-indexer/config/opensearch.yml
+      - /share/wazuh/config/wazuh_indexer/internal_users.yml:/usr/share/wazuh-indexer/config/opensearch-security/internal_users.yml
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: any
+
+  wazuh3.indexer:
+    image: wazuh/wazuh-indexer:4.10.3
+    networks:
+      - wazuh-net
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "bootstrap.memory_lock=true"
+    volumes:
+      - /share/wazuh/indexer3:/var/lib/wazuh-indexer
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/root-ca.pem:/usr/share/wazuh-indexer/config/certs/root-ca.pem
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh3.indexer-key.pem:/usr/share/wazuh-indexer/config/certs/wazuh3.indexer.key
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh3.indexer.pem:/usr/share/wazuh-indexer/config/certs/wazuh3.indexer.pem
+      - /share/wazuh/config/wazuh_indexer/wazuh3.indexer.yml:/usr/share/wazuh-indexer/config/opensearch.yml
+      - /share/wazuh/config/wazuh_indexer/internal_users.yml:/usr/share/wazuh-indexer/config/opensearch-security/internal_users.yml
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: any
+
+  wazuh.dashboard:
+    image: wazuh/wazuh-dashboard:4.10.3
+    networks:
+      - wazuh-net
+    ports:
+      - 443:5601
+    environment:
+      - OPENSEARCH_HOSTS="https://wazuh1.indexer:9200"
+      - WAZUH_API_URL="https://wazuh.master"
+      - API_USERNAME=wazuh-wui
+      - API_PASSWORD=MyS3cr37P450r.*-
+      - DASHBOARD_USERNAME=kibanaserver
+      - DASHBOARD_PASSWORD=kibanaserver
+    volumes:
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh.dashboard.pem:/usr/share/wazuh-dashboard/certs/wazuh-dashboard.pem
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh.dashboard-key.pem:/usr/share/wazuh-dashboard/certs/wazuh-dashboard-key.pem
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/root-ca.pem:/usr/share/wazuh-dashboard/certs/root-ca.pem
+      - /share/wazuh/config/wazuh_dashboard/opensearch_dashboards.yml:/usr/share/wazuh-dashboard/config/opensearch_dashboards.yml
+      - /share/wazuh/config/wazuh_dashboard/wazuh.yml:/usr/share/wazuh-dashboard/data/wazuh/config/wazuh.yml
+      - /share/wazuh/dashboard:/usr/share/wazuh-dashboard/data/wazuh/config
+      - /share/wazuh/dashboard:/usr/share/wazuh-dashboard/plugins/wazuh/public/assets/custom
+    deploy:
+      replicas: 2
+      placement:
+        constraints: [node.role == worker]
+      restart_policy:
+        condition: any
+
+  nginx:
+    image: nginx:stable
+    networks:
+      - wazuh-net
+    ports:
+      - "1514:1514"
+    volumes:
+      - /share/wazuh/config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    deploy:
+      placement:
+        constraints: [node.role == worker]
+      restart_policy:
+        condition: any
