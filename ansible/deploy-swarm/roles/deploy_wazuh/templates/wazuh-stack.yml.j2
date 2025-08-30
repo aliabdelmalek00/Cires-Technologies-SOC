@@ -6,7 +6,7 @@ networks:
     attachable: true
 
 services:
-  wazuh.master:
+  wazuh-master:
     image: wazuh/wazuh-manager:4.10.3
     networks:
       - wazuh-net
@@ -44,7 +44,7 @@ services:
       restart_policy:
         condition: any
 
-  wazuh.worker:
+  wazuh-worker:
     image: wazuh/wazuh-manager:4.10.3
     networks:
       - wazuh-net
@@ -76,7 +76,7 @@ services:
       restart_policy:
         condition: any
 
-  wazuh1.indexer:
+  wazuh1-indexer:
     image: wazuh/wazuh-indexer:4.10.3
     networks:
       - wazuh-net
@@ -104,7 +104,7 @@ services:
       restart_policy:
         condition: any
 
-  wazuh2.indexer:
+  wazuh2-indexer:
     image: wazuh/wazuh-indexer:4.10.3
     networks:
       - wazuh-net
@@ -124,7 +124,7 @@ services:
       restart_policy:
         condition: any
 
-  wazuh3.indexer:
+  wazuh3-indexer:
     image: wazuh/wazuh-indexer:4.10.3
     networks:
       - wazuh-net
@@ -140,11 +140,11 @@ services:
       - /share/wazuh/config/wazuh_indexer/internal_users.yml:/usr/share/wazuh-indexer/config/opensearch-security/internal_users.yml
     deploy:
       placement:
-        constraints: [node.role == manager]
+        constraints: [node.role == worker]
       restart_policy:
         condition: any
 
-  wazuh.dashboard:
+  wazuh-dashboard:
     image: wazuh/wazuh-dashboard:4.10.3
     networks:
       - wazuh-net
