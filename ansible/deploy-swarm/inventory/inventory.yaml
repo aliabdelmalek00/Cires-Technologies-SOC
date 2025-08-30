@@ -3,16 +3,16 @@ all:
     control_plane:
       hosts:
         cp1:
-          ansible_host: 10.10.1.9
+          ansible_host: 10.10.2.9
         cp2:
-          ansible_host: 10.10.1.10
+          ansible_host: 10.10.2.10
         cp3:
-          ansible_host: 10.10.1.11 
+          ansible_host: 10.10.2.11 
     workers:
       hosts:
         worker1:
-          ansible_host: 10.10.1.12
+          ansible_host: 10.10.2.12
         worker2:
-          ansible_host: 10.10.1.13
+          ansible_host: 10.10.2.13
         worker3:
-          ansible_host: 10.10.1.14
+          ansible_host: 10.10.2.14
