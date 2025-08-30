@@ -1,9 +1,16 @@
+---
 - name: Deploy Kubernetes Cluster
   hosts: all
   become: yes
   tasks:
     - name: Ensure swap is off
       command: swapoff -a
+
+    - name: Disable swap permanently
+      replace:
+        path: /etc/fstab
+        regexp: '(^.*swap.*$)'
+        replace: '# \1'
 
     - name: Install required packages
       apt:
@@ -17,6 +24,7 @@
         - gnupg
         - lsb-release
 
+    # ---------------- Docker Installation ----------------
     - name: Add Docker GPG key
       apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
@@ -33,6 +41,24 @@
         state: present
         update_cache: yes
 
+    - name: Enable and start Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    # ---------------- Kubernetes Installation ----------------
+    - name: Add Kubernetes apt repository GPG key
+      apt_key:
+        url: https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key
+        state: present
+
+    - name: Add Kubernetes apt repository
+      apt_repository:
+        repo: "deb https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /"
+        state: present
+        filename: kubernetes
+
     - name: Install Kubeadm, Kubelet, Kubectl
       apt:
         name:
@@ -40,7 +66,12 @@
           - kubeadm
           - kubectl
         state: present
+        update_cache: yes
 
+    - name: Hold kubelet, kubeadm, kubectl at current version
+      command: apt-mark hold kubelet kubeadm kubectl
+
+# ---------------- Control Plane Init ----------------
 - name: Initialize Control Plane
   hosts: control_plane
   become: yes
@@ -50,15 +81,20 @@
       when: inventory_hostname == groups['control_plane'][0]
 
     - name: Copy kubeconfig for cluster management
-      command: mkdir -p $HOME/.kube && cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && chown $(id -u):$(id -g) $HOME/.kube/config
+      command: >
+        mkdir -p $HOME/.kube &&
+        cp -i /etc/kubernetes/admin.conf $HOME/.kube/config &&
+        chown $(id -u):$(id -g) $HOME/.kube/config
       when: inventory_hostname == groups['control_plane'][0]
 
-    # Additional tasks: join other masters, install pod network (Flannel/Calico)
+    - name: Install Flannel CNI network
+      command: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+      when: inventory_hostname == groups['control_plane'][0]
 
+# ---------------- Worker Join ----------------
 - name: Join Worker Nodes
   hosts: workers
   become: yes
   tasks:
     - name: Join cluster
       command: kubeadm join {{ hostvars[groups['control_plane'][0]]['ansible_host'] }}:6443 --token <token> --discovery-token-ca-cert-hash sha256:<hash>
-
