@@ -25,7 +25,7 @@ jobs:
 
       - name: Test connectivity to target VMs
         run: |
-          ansible all -i all -m ping
+          ansible all -i inventory/inventory.yaml -m ping
 
       - name: Run Ansible Playbook
         working-directory: ansible/deploy-swarm
