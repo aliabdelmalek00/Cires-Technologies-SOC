@@ -1,4 +1,4 @@
-name: Deploy Docker Swarm
+name: Deploy Docker Wazuh Cluster
 
 on:
   workflow_dispatch:  
