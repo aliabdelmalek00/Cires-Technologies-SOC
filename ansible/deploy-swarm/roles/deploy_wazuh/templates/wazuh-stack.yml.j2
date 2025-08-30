@@ -133,6 +133,8 @@ services:
       - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh1-indexer-key.pem:/usr/share/wazuh-indexer/config/certs/wazuh1.indexer.key
       - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh1-indexer.pem:/usr/share/wazuh-indexer/config/certs/wazuh1.indexer.pem
       - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh1-indexer.pem:/etc/wazuh-indexer/certs/indexer.pem
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh1-indexer-key.pem:/etc/wazuh-indexer/certs/indexer.key
+      - /share/wazuh/config/wazuh_indexer_ssl_certs/root-ca.pem:/etc/wazuh-indexer/certs/root-ca.pem
       - /share/wazuh/config/wazuh_indexer_ssl_certs/admin.pem:/usr/share/wazuh-indexer/config/certs/admin.pem
       - /share/wazuh/config/wazuh_indexer_ssl_certs/admin-key.pem:/usr/share/wazuh-indexer/config/certs/admin-key.pem
       - /share/wazuh/config/wazuh_indexer/wazuh1.indexer.yml:/usr/share/wazuh-indexer/config/opensearch.yml
