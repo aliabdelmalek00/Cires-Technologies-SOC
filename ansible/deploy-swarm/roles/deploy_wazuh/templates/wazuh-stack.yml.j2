@@ -118,7 +118,7 @@ services:
     networks:
       - wazuh-net
     ports:
-      - 9600:9600
+      - 9200:9200
     environment:
       - "discovery.type=single-node"
       - "cluster.name=wazuh-cluster"
