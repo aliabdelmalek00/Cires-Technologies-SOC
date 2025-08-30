@@ -114,7 +114,7 @@ services:
         condition: any
 
   wazuh1-indexer:
-    image: wazuh/wazuh-indexer:4.10.3
+    image: wazuh/wazuh-indexer:4.13.0-beta2
     user: 1000:1000
     networks:
       - wazuh-net
@@ -149,7 +149,7 @@ services:
         condition: any
 
   wazuh2-indexer:
-    image: wazuh/wazuh-indexer:4.10.3
+    image: wazuh/wazuh-indexer:4.13.0-beta2
     user: 1000:1000
     networks:
       - wazuh-net
@@ -176,7 +176,7 @@ services:
         condition: any
 
   wazuh3-indexer:
-    image: wazuh/wazuh-indexer:4.10.3
+    image: wazuh/wazuh-indexer:4.13.0-beta2
     user: 1000:1000
     networks:
       - wazuh-net
