@@ -115,16 +115,16 @@ services:
 
   wazuh1-indexer:
     image: wazuh/wazuh-indexer:4.13.0-beta2
-    user: 1000:1000
+    
     networks:
       - wazuh-net
     ports:
-      - 9200:9200
+      - 9600:9600
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g"
-      - "bootstrap.memory_lock=true"
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "bootstrap.memory_lock=false"
       - "cluster.name=wazuh-cluster"
-      - "JAVA_TOOL_OPTIONS=-Djava.security.policy=/usr/share/wazuh-indexer/indexer.policy"
+     
     volumes:
       - /share/wazuh/indexer2:/var/lib/wazuh-indexer
       - /share/wazuh/config/wazuh_indexer_ssl_certs/root-ca.pem:/usr/share/wazuh-indexer/config/certs/root-ca.pem
@@ -133,7 +133,7 @@ services:
       - /share/wazuh/config/wazuh_indexer_ssl_certs/wazuh1-indexer.pem:/etc/wazuh-indexer/certs/indexer.pem
       - /share/wazuh/config/wazuh_indexer/wazuh2.indexer.yml:/usr/share/wazuh-indexer/config/opensearch.yml
       - /share/wazuh/config/wazuh_indexer/internal_users.yml:/usr/share/wazuh-indexer/config/opensearch-security/internal_users.yml
-      - /share/wazuh/indexer.policy:/usr/share/wazuh-indexer/indexer.policy:ro
+    
     deploy:
       placement:
         constraints: [node.role == manager]
