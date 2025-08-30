@@ -83,16 +83,6 @@
     timeout: 600
     state: started
 
-- name: Deploy Nginx reverse proxy
-  community.docker.docker_container:
-    name: wazuh-nginx
-    image: nginx:mainline
-    state: started
-    restart_policy: always
-    ports:
-      - "1519:1519"
-    volumes:
-      - /share/wazuh/config/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
 
 
 
