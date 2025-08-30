@@ -118,6 +118,8 @@ services:
     user: 1000:1000
     networks:
       - wazuh-net
+    ports:
+      - 9200:9200
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g"
       - "bootstrap.memory_lock=true"
