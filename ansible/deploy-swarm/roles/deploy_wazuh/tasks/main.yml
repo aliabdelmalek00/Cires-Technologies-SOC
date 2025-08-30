@@ -64,13 +64,14 @@
     src: roles/deploy_wazuh/templates/wazuh-stack.yml.j2
     dest: /tmp/docker-compose.yml
 
-- name: Deploy Wazuh stack with Docker Compose
-  community.docker.docker_compose:
+- name: Deploy Wazuh stack with Docker Compose V2
+  community.docker.docker_compose_v2:
     project_src: /tmp
     files:
-      - docker-compose.yml
+      - wazuh-stack.yml
     state: present
-    restarted: true
+    pull: yes            # optional: pulls latest images
+    recreate: yes        # optional: recreate containers if config changes
   environment:
     UID: "{{ ansible_user_uid }}"
     GID: "{{ ansible_user_gid }}"
@@ -83,6 +84,7 @@
     delay: 10
     timeout: 600
     state: started
+
 
 
 
