@@ -36,9 +36,4 @@
     owner: 0
     group: 0
 
-- name: Recursively make wazuh folder world-writable
-  ansible.builtin.file:
-    path: "{{ mount_point }}/wazuh"
-    state: directory
-    recurse: yes
-    mode: '0777'
+
