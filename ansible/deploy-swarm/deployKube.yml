@@ -80,21 +80,16 @@
       command: kubeadm init --apiserver-advertise-address={{ ansible_host }} --pod-network-cidr=10.244.0.0/16
       when: inventory_hostname == groups['control_plane'][0]
 
-    - name: Save join command to a file
+    - name: Get join command
       command: kubeadm token create --print-join-command
       register: join_cmd
       when: inventory_hostname == groups['control_plane'][0]
 
-    - name: Set fact with join command
+    - name: Save join command to a global fact
       set_fact:
         kube_join_command: "{{ join_cmd.stdout }}"
       when: inventory_hostname == groups['control_plane'][0]
-
-    - name: Share join command with other hosts
-      add_host:
-        name: "kube_join_info"
-        kube_join_command: "{{ kube_join_command }}"
-      when: inventory_hostname == groups['control_plane'][0]
+      run_once: true
 
 
 # ---------------- Worker Join ----------------
@@ -103,4 +98,5 @@
   become: yes
   tasks:
     - name: Join cluster
-      command: "{{ hostvars['kube_join_info']['kube_join_command'] }}"
+      command: "{{ hostvars[groups['control_plane'][0]].kube_join_command }}"
+
