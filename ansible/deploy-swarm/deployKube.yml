@@ -1,1 +1,41 @@
+- name: Deploy Kubernetes Cluster
+  hosts: all
+  become: yes
+  tasks:
+    - name: Ensure swap is off
+      command: swapoff -a
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Install Kubeadm, Kubelet, Kubectl
+      apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+
+- name: Initialize Control Plane
+  hosts: control_plane
+  become: yes
+  tasks:
+    - name: kubeadm init on first master only
+      command: kubeadm init --apiserver-advertise-address={{ ansible_host }} --pod-network-cidr=10.244.0.0/16
+      when: inventory_hostname == groups['control_plane'][0]
+
+    - name: Copy kubeconfig for cluster management
+      command: mkdir -p $HOME/.kube && cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && chown $(id -u):$(id -g) $HOME/.kube/config
+      when: inventory_hostname == groups['control_plane'][0]
+
+    # Additional tasks: join other masters, install pod network (Flannel/Calico)
+
+- name: Join Worker Nodes
+  hosts: workers
+  become: yes
+  tasks:
+    - name: Join cluster
+      command: kubeadm join {{ hostvars[groups['control_plane'][0]]['ansible_host'] }}:6443 --token <token> --discovery-token-ca-cert-hash sha256:<hash>
 
