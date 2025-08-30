@@ -114,16 +114,16 @@ services:
         condition: any
 
   wazuh1-indexer:
-    image: wazuh/wazuh-indexer:4.13.0-beta2
-    
+    image: docker.elastic.co/elasticsearch/elasticsearch-wolfi:9.1.3
     networks:
       - wazuh-net
     ports:
       - 9600:9600
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "bootstrap.memory_lock=false"
+      - "discovery.type=single-node"
       - "cluster.name=wazuh-cluster"
+      - "bootstrap.memory_lock=true"
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
      
     volumes:
       - /share/wazuh/indexer2:/var/lib/wazuh-indexer
