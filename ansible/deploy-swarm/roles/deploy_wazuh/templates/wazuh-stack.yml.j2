@@ -114,8 +114,8 @@ services:
         condition: any
 
   wazuh1-indexer:
-    image: wwazuh1-indexer-custom:4.13.0-beta2
     build: /tmp/dockerfile1
+    image: wwazuh1-indexer-custom:4.13.0-beta2
     user: "0:0"
     networks:
       - wazuh-net
