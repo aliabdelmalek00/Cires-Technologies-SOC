@@ -62,14 +62,15 @@
 - name: Render Wazuh stack template
   ansible.builtin.template:
     src: roles/deploy_wazuh/templates/wazuh-stack.yml.j2
-    dest: /tmp/wazuh-stack.yml
+    dest: /tmp/docker-compose.yml
 
-- name: Deploy Wazuh stack
-  community.docker.docker_stack:
-    name: wazuh
+- name: Deploy Wazuh stack with Docker Compose
+  community.docker.docker_compose:
+    project_src: /tmp
+    files:
+      - docker-compose.yml
     state: present
-    compose:
-      - /tmp/wazuh-stack.yml
+    restarted: true
   environment:
     UID: "{{ ansible_user_uid }}"
     GID: "{{ ansible_user_gid }}"
@@ -82,6 +83,7 @@
     delay: 10
     timeout: 600
     state: started
+
 
 
 
