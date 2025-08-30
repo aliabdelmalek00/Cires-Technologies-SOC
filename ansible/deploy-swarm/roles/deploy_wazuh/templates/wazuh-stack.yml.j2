@@ -123,6 +123,8 @@ services:
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g"
       - "bootstrap.memory_lock=true"
+      - "cluster.name=wazuh-cluster"
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
     volumes:
       - /share/wazuh/indexer2:/var/lib/wazuh-indexer
       - /share/wazuh/config/wazuh_indexer_ssl_certs/root-ca.pem:/usr/share/wazuh-indexer/config/certs/root-ca.pem
