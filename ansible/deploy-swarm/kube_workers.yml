@@ -2,17 +2,22 @@
   hosts: master1
   become: yes
   tasks:
-    - name: Retrieve Join Command
+    - name: Retrieve control-plane join command with certificate key
+      shell: kubeadm token create --print-join-command --certificate-key $(kubeadm init phase upload-certs --upload-certs | grep 'Using certificate key' | awk '{print $4}')
+      register: cp_join_cmd
+      changed_when: false
+
+    - name: Retrieve worker join command
       shell: kubeadm token create --print-join-command
-      register: join_command_raw
+      register: worker_join_cmd
+      changed_when: false
 
-    - name: Set Join Command fact
+    - name: Set join commands as facts
       set_fact:
-        join_command: "{{ join_command_raw.stdout_lines[0] }}"
-      run_once: true
-      delegate_to: localhost
+        cp_join_command: "{{ cp_join_cmd.stdout }}"
+        worker_join_command: "{{ worker_join_cmd.stdout }}"
 
-- name: Join Other Masters
+- name: Join other master nodes as control-plane
   hosts: master2:master3
   become: yes
   tasks:
@@ -20,15 +25,15 @@
       wait_for:
         host: "{{ hostvars['master1'].ansible_host }}"
         port: 6443
-        timeout: 120
+        timeout: 180
 
     - name: Join master node to cluster
-      shell: "{{ hostvars['master1'].join_command }} --control-plane --certificate-key <CERT_KEY_HERE>"
+      shell: "{{ hostvars['master1'].cp_join_command }}"
       args:
         chdir: "/home/{{ ansible_user }}"
         creates: node_joined.log
 
-- name: Join Worker Nodes
+- name: Join worker nodes to cluster
   hosts: workers
   become: yes
   tasks:
@@ -36,10 +41,10 @@
       wait_for:
         host: "{{ hostvars['master1'].ansible_host }}"
         port: 6443
-        timeout: 120
+        timeout: 180
 
     - name: Join worker node to cluster
-      shell: "{{ hostvars['master1'].join_command }}"
+      shell: "{{ hostvars['master1'].worker_join_command }}"
       args:
         chdir: "/home/{{ ansible_user }}"
         creates: node_joined.log
