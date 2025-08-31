@@ -23,12 +23,6 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        # Dashboard router
-        - "traefik.http.routers.wazuh-dashboard.rule=Host(`wazuh.dashboard`)"
-        - "traefik.http.routers.wazuh-dashboard.entrypoints=websecure"
-        - "traefik.http.routers.wazuh-dashboard.tls=true"
-        - "traefik.http.routers.wazuh-dashboard.tls.certificates[0].certFile=/certs/wazuh-dashboard.pem"
-        - "traefik.http.routers.wazuh-dashboard.tls.certificates[0].keyFile=/certs/wazuh-dashboard-key.pem"
       mode: replicated
       replicas: 1
       placement:
@@ -42,7 +36,9 @@ services:
       - wazuh-net
     deploy:
       mode: replicated
-      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
       restart_policy:
         condition: on-failure
       resources:
@@ -94,7 +90,9 @@ services:
       - wazuh-net
     deploy:
       mode: replicated
-      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
       restart_policy:
         condition: on-failure
       resources:
