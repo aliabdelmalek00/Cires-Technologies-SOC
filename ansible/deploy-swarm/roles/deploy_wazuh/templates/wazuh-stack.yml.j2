@@ -1,5 +1,10 @@
 version: "3.9"
 
+secrets:
+  api_credentials: { external: true }
+  dashboard_credentials: { external: true }
+  indexer_credentials: { external: true }
+  
 networks:
   wazuh-net:
     external: true
@@ -49,14 +54,14 @@ services:
         hard: 655360
     environment:
       - INDEXER_URL=https://wazuh1.indexer:9200
-      - INDEXER_USERNAME=admin
-      - INDEXER_PASSWORD=SecretPassword
+      - INDEXER_USERNAME={{ indexer_username }}
+      - INDEXER_PASSWORD={{ indexer_password }}
       - FILEBEAT_SSL_VERIFICATION_MODE=full
       - SSL_CERTIFICATE_AUTHORITIES=/etc/ssl/root-ca.pem
       - SSL_CERTIFICATE=/etc/ssl/filebeat.pem
       - SSL_KEY=/etc/ssl/filebeat.key
-      - API_USERNAME=wazuh-wui
-      - API_PASSWORD=MyS3cr37P450r.*-
+      - API_USERNAME={{ api_username }}
+      - API_PASSWORD={{ api_password }}
     volumes:
       - /share/wazuh/master/api_configuration:/var/ossec/api/configuration
       - /share/wazuh/master/etc:/var/ossec/etc
@@ -103,8 +108,8 @@ services:
         hard: 655360
     environment:
       - INDEXER_URL=https://wazuh1.indexer:9200
-      - INDEXER_USERNAME=admin
-      - INDEXER_PASSWORD=SecretPassword
+      - INDEXER_USERNAME={{ indexer_username }}
+      - INDEXER_PASSWORD={{ indexer_password }}
       - FILEBEAT_SSL_VERIFICATION_MODE=full
       - SSL_CERTIFICATE_AUTHORITIES=/etc/ssl/root-ca.pem
       - SSL_CERTIFICATE=/etc/ssl/filebeat.pem
@@ -236,10 +241,10 @@ services:
     environment:
       - OPENSEARCH_HOSTS=https://wazuh1.indexer:9200
       - WAZUH_API_URL=https://wazuh.master
-      - API_USERNAME=wazuh-wui
-      - API_PASSWORD=MyS3cr37P450r.*-
-      - DASHBOARD_USERNAME=kibanaserver
-      - DASHBOARD_PASSWORD=kibanaserver
+      - API_USERNAME={{ api_username }}
+      - API_PASSWORD={{ api_password }}
+      - DASHBOARD_USERNAME={{ dashboard_username }}
+      - DASHBOARD_PASSWORD={{ dashboard_password }}
     ports:
       - 443:5601
     volumes:
