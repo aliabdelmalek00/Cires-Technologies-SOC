@@ -145,7 +145,7 @@ services:
     environment:
       - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
       - bootstrap.memory_lock=true
-      - node.name=wazuh1.indexer
+      - OPENSEARCH_PATH_CONF=/usr/share/wazuh-indexer/config
     ulimits:
       memlock:
         soft: -1
@@ -155,13 +155,13 @@ services:
         hard: 65536
     volumes:
       - /share/wazuh/indexer1/data:/var/lib/wazuh-indexer
-      - /share/config/wazuh_indexer_ssl_certs/root-ca.pem:/etc/wazuh-indexer/certs/root-ca.pem
-      - /share/config/wazuh_indexer_ssl_certs/wazuh1.indexer-key.pem:/etc/wazuh-indexer/certs/wazuh1.indexer.key
-      - /share/config/wazuh_indexer_ssl_certs/wazuh1.indexer.pem:/etc/wazuh-indexer/certs/wazuh1.indexer.pem
-      - /share/config/wazuh_indexer_ssl_certs/admin.pem:/etc/wazuh-indexer/certs/admin.pem
-      - /share/config/wazuh_indexer_ssl_certs/admin-key.pem:/etc/wazuh-indexer/certs/admin-key.pem
-      - /share/config/wazuh_indexer/wazuh1.indexer.yml:/etc/wazuh-indexer/config/opensearch.yml
-      - /share/config/wazuh_indexer/internal_users.yml:/etc/wazuh-indexer/opensearch-security/internal_users.yml
+      - /share/config/wazuh_indexer_ssl_certs/root-ca.pem:/usr/share/wazuh-indexer/config/certs/root-ca.pem
+      - /share/config/wazuh_indexer_ssl_certs/wazuh1.indexer-key.pem:/usr/share/wazuh-indexer/config/certs/wazuh1.indexer.key
+      - /share/config/wazuh_indexer_ssl_certs/wazuh1.indexer.pem:/usr/share/wazuh-indexer/config/certs/wazuh1.indexer.pem
+      - /share/config/wazuh_indexer_ssl_certs/admin.pem:/usr/share/wazuh-indexer/config/certs/admin.pem
+      - /share/config/wazuh_indexer_ssl_certs/admin-key.pem:/usr/share/wazuh-indexer/config/certs/admin-key.pem
+      - /share/config/wazuh_indexer/wazuh1.indexer.yml:/usr/share/wazuh-indexer/config/config/opensearch.yml
+      - /share/config/wazuh_indexer/internal_users.yml:/usr/share/wazuh-indexer/config/opensearch-security/internal_users.yml
     ports:
       - "9200:9200"
 
