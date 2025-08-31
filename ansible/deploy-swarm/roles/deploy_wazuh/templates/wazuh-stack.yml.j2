@@ -181,7 +181,7 @@ services:
     environment:
       - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
       - bootstrap.memory_lock=true
-      - "OPENSEARCH_PATH_CONF=/usr/share/wazuh-indexer/config/"
+      - OPENSEARCH_PATH_CONF=/usr/share/wazuh-indexer/config
     ulimits:
       memlock:
         soft: -1
@@ -213,6 +213,7 @@ services:
     environment:
       - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
       - bootstrap.memory_lock=true
+      - OPENSEARCH_PATH_CONF=/usr/share/wazuh-indexer/config
     ulimits:
       memlock:
         soft: -1
