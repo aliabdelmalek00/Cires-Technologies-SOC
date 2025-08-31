@@ -9,7 +9,6 @@
     - name: Set Join Command fact
       set_fact:
         join_command: "{{ join_command_raw.stdout_lines[0] }}"
-      # Make this fact available to all hosts
       run_once: true
       delegate_to: localhost
 
@@ -18,7 +17,7 @@
   become: yes
   tasks:
     - name: Wait for master1 API to be ready
-      wait_for: 
+      wait_for:
         host: "{{ hostvars['master1'].ansible_host }}"
         port: 6443
         timeout: 120
@@ -34,7 +33,7 @@
   become: yes
   tasks:
     - name: Wait for master1 API to be ready
-      wait_for: 
+      wait_for:
         host: "{{ hostvars['master1'].ansible_host }}"
         port: 6443
         timeout: 120
