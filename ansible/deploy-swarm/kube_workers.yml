@@ -24,5 +24,5 @@
     - name: Join worker to cluster
       shell: "{{ hostvars['master1'].join_command }}"
       args:
-        chdir: /home/"{{ ansible_user }}"
+        chdir: "/home/{{ ansible_user }}"
         creates: node_joined.log
