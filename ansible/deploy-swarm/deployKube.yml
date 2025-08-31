@@ -1,102 +1,151 @@
----
-- name: Deploy Kubernetes Cluster
+- name: Kubernetes Dependencies
   hosts: all
   become: yes
   tasks:
-    - name: Ensure swap is off
-      command: swapoff -a
+    - name: Updates
+      apt:
+        update_cache: yes
 
-    - name: Disable swap permanently
+    - name: Reboot
+      reboot:
+
+    - name: Disable SWAP
+      shell: |
+        swapoff -a
+
+    - name: Disable SWAP in fstab
       replace:
         path: /etc/fstab
-        regexp: '(^.*swap.*$)'
+        regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
         replace: '# \1'
 
-    - name: Install required packages
-      apt:
-        name: "{{ item }}"
-        state: present
-        update_cache: yes
-      loop:
-        - apt-transport-https
-        - ca-certificates
-        - curl
-        - gnupg
-        - lsb-release
+    - name: Create an empty file for the containerd module
+      copy:
+        content: ""
+        dest: /etc/modules-load.d/containerd.conf
+        force: no
 
-    # ---------------- Docker Installation ----------------
-    - name: Add Docker GPG key
-      apt_key:
+    - name: Configure modules for containerd
+      blockinfile:
+        path: /etc/modules-load.d/containerd.conf
+        block: |
+          overlay
+          br_netfilter
+
+    - name: Create an empty file for K8S sysctl parameters
+      copy:
+        content: ""
+        dest: /etc/sysctl.d/99-kubernetes-cri.conf
+        force: no
+
+    - name: Configure sysctl parameters for K8S
+      lineinfile:
+        path: /etc/sysctl.d/99-kubernetes-cri.conf
+        line: "{{ item }}"
+      with_items:
+        - "net.bridge.bridge-nf-call-iptables  = 1"
+        - "net.ipv4.ip_forward                 = 1"
+        - "net.bridge.bridge-nf-call-ip6tables = 1"
+
+    - name: Apply sysctl parameters
+      command: sysctl --system
+
+    - name: Install APT Transport HTTPS
+      apt:
+        name: apt-transport-https
+        state: present
+
+    - name: Add Docker apt-key
+      get_url:
         url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
+        dest: /etc/apt/keyrings/docker-apt-keyring.asc
+        mode: "0644"
+        force: true
 
-    - name: Add Docker repository
+    - name: Add Docker's APT repo
       apt_repository:
-        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable"
-        state: present
-
-    - name: Install Docker CE
-      apt:
-        name: docker-ce
+        repo: "deb [arch={{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }} signed-by=/etc/apt/keyrings/docker-apt-keyring.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
         state: present
         update_cache: yes
 
-    - name: Enable and start Docker
+    - name: Add Kubernetes apt-key
+      get_url:
+        url: https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key
+        dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
+        mode: "0644"
+        force: true
+
+    - name: Add Kubernetes APT repository
+      apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /"
+        state: present
+        update_cache: yes
+
+    - name: Install containerd
+      apt:
+        name: containerd.io
+        state: present
+
+    - name: Create containerd directory
+      file:
+        path: /etc/containerd
+        state: directory
+
+    - name: Add containerd configuration
+      shell: /usr/bin/containerd config default > /etc/containerd/config.toml
+
+    - name: Configuring Systemd cgroup driver for containerd
+      lineinfile:
+        path: /etc/containerd/config.toml
+        regexp: "            SystemdCgroup = false"
+        line: "            SystemdCgroup = true"
+
+    - name: Enable the containerd service and start service
       systemd:
-        name: docker
-        state: started
+        name: containerd
+        state: restarted
+        enabled: yes
+        daemon-reload: yes
+
+    - name: Install Kubelet
+      apt:
+        name: kubelet=1.29.*
+        state: present
+        update_cache: true
+
+    - name: Install Kubeadm
+      apt:
+        name: kubeadm=1.29.*
+        state: present
+
+    - name: Enable the Kubelet service
+      service:
+        name: kubelet
         enabled: yes
 
-    # ---------------- Kubernetes Installation ----------------
-    - name: Add Kubernetes apt repository GPG key
-      apt_key:
-        url: https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key
+    - name: Load br_netfilter kernel module
+      modprobe:
+        name: br_netfilter
         state: present
 
-    - name: Add Kubernetes apt repository
-      apt_repository:
-        repo: "deb https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /"
-        state: present
-        filename: kubernetes
+    - name: Set bridge-nf-call-iptables
+      sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        value: 1
 
-    - name: Install Kubeadm, Kubelet, Kubectl
+    - name: Set ip_forward
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: 1
+
+    - name: Reboot
+      reboot:
+
+- hosts: master
+  become: yes
+  tasks:
+    - name: Install Kubectl
       apt:
-        name:
-          - kubelet
-          - kubeadm
-          - kubectl
+        name: kubectl=1.29.*
         state: present
-        update_cache: yes
-
-    - name: Hold kubelet, kubeadm, kubectl at current version
-      command: apt-mark hold kubelet kubeadm kubectl
-
-# ---------------- Control Plane Init ----------------
-- name: Initialize Control Plane
-  hosts: control_plane
-  become: yes
-  tasks:
-    - name: kubeadm init on first master only
-      command: kubeadm init --apiserver-advertise-address={{ ansible_host }} --pod-network-cidr=10.244.0.0/16
-      when: inventory_hostname == groups['control_plane'][0]
-
-    - name: Get join command
-      command: kubeadm token create --print-join-command
-      register: join_cmd
-      when: inventory_hostname == groups['control_plane'][0]
-
-    - name: Save join command to a global fact
-      set_fact:
-        kube_join_command: "{{ join_cmd.stdout }}"
-      when: inventory_hostname == groups['control_plane'][0]
-      run_once: true
-
-
-# ---------------- Worker Join ----------------
-- name: Join Worker Nodes
-  hosts: workers
-  become: yes
-  tasks:
-    - name: Join cluster
-      command: "{{ hostvars[groups['control_plane'][0]].kube_join_command }}"
-
+        force: yes
