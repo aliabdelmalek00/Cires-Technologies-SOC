@@ -42,7 +42,7 @@ services:
       - /share/wazuh/master/etc:/var/ossec/etc
       - /share/wazuh/master/logs:/var/ossec/logs
       - /share/wazuh/master/queue:/var/ossec/queue
-      - /share/wazuh/master/var_multigroups:/var/ossec/var/multigroups
+      - /share/wazuh/master/var-multigroups:/var/ossec/var/multigroups
       - /share/wazuh/master/integrations:/var/ossec/integrations
       - /share/wazuh/master/agentless:/var/ossec/agentless
       - /share/wazuh/master/wodles:/var/ossec/wodles
@@ -92,7 +92,7 @@ services:
       - /share/wazuh/worker/etc:/var/ossec/etc
       - /share/wazuh/worker/logs:/var/ossec/logs
       - /share/wazuh/worker/queue:/var/ossec/queue
-      - /share/wazuh/worker/var_multigroups:/var/ossec/var/multigroups
+      - /share/wazuh/worker/var-multigroups:/var/ossec/var/multigroups
       - /share/wazuh/worker/integrations:/var/ossec/integrations
       - /share/wazuh/worker/agentless:/var/ossec/agentless
       - /share/wazuh/worker/wodles:/var/ossec/wodles
