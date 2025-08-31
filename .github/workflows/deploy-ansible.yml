@@ -31,8 +31,8 @@ jobs:
         working-directory: ansible/deploy-swarm
         run: |
           ansible-playbook -i inventory/inventory.yaml deploy.yml -e "
-          api_username=${{ secrets.API_USERNAME }}
-          api_password=${{ secrets.API_PASSWORD }}
+          api_username=${{ secrets.WAZUH_API_USERNAME }}
+          api_password=${{ secrets.WAZUH_API_PASSWORD }}
           dashboard_username=${{ secrets.DASHBOARD_USERNAME }}
           dashboard_password=${{ secrets.DASHBOARD_PASSWORD }}
           indexer_username=${{ secrets.INDEXER_USERNAME }}
