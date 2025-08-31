@@ -8,13 +8,7 @@ services:
   traefik:
     image: traefik:v2.11
     command:
-      - "--api.insecure=true" 
-      - "--providers.docker.swarmmode=true"
-      - "--providers.docker.network=wazuh-net"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.wazuh-tcp.address=:1514/tcp"
+      - "--configFile=/etc/traefik/traefik.yml"
     ports:
       - "80:80"
       - "443:443"
@@ -22,8 +16,8 @@ services:
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "/share/config/wazuh_indexer_ssl_certs/wazuh.dashboard.pem:/certs/wazuh-dashboard.pem:ro"
-      - "/share/config/wazuh_indexer_ssl_certs/wazuh.dashboard-key.pem:/certs/wazuh-dashboard-key.pem:ro"
+      - "/share/config/wazuh_indexer_ssl_certs:/certs:ro"
+      - "./traefik.yml:/etc/traefik/traefik.yml:ro"
     networks:
       - wazuh-net
     deploy:
