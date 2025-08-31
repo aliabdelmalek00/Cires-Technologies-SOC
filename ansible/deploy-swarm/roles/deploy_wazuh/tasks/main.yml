@@ -18,6 +18,16 @@
     attachable: yes
     state: present
 
+- name: Create all Wazuh secrets in Swarm
+  community.docker.docker_secret:
+    name: "{{ item.name }}"
+    secret: "{{ item.value }}"
+    state: present
+  loop:
+    - { name: api_credentials, value: "{{ api_username }}:{{ api_password }}" }
+    - { name: dashboard_credentials, value: "{{ dashboard_username }}:{{ dashboard_password }}" }
+    - { name: indexer_credentials, value: "{{ indexer_username }}:{{ indexer_password }}" }
+
 - name: Render Wazuh stack template
   ansible.builtin.template:
     src: roles/deploy_wazuh/templates/wazuh-stack.yml.j2
@@ -33,6 +43,7 @@
     UID: "{{ ansible_user_uid }}"
     GID: "{{ ansible_user_gid }}"
   register: wazuh_stack
+
 
 
 
