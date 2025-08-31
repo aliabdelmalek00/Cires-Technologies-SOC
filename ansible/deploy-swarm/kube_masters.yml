@@ -51,22 +51,14 @@
       until: api_ready.rc == 0
       when: inventory_hostname == 'master1'
 
-    - name: Retrieve control-plane join command with certificate key
-      shell: kubeadm token create --print-join-command --certificate-key $(kubeadm init phase upload-certs --upload-certs | grep 'Using certificate key' | awk '{print $4}')
-      register: cp_join_cmd
-      changed_when: false
-      when: inventory_hostname == 'master1'
-
-    - name: Retrieve worker join command
-      shell: kubeadm token create --print-join-command
-      register: worker_join_cmd
-      changed_when: false
-      when: inventory_hostname == 'master1'
-
-    - name: Set join commands as facts
+    - name: Extract control-plane join command
       set_fact:
-        cp_join_command: "{{ cp_join_cmd.stdout }}"
-        worker_join_command: "{{ worker_join_cmd.stdout }}"
+        cp_join_command: "{{ init_output.stdout | regex_search('kubeadm join .*--control-plane --certificate-key [a-f0-9]+', '\\0') }}"
+      when: inventory_hostname == 'master1'
+
+    - name: Extract worker join command
+      set_fact:
+        worker_join_command: "{{ init_output.stdout | regex_search('kubeadm join .*', '\\0') }}"
       when: inventory_hostname == 'master1'
 
     - name: Create .kube directory for user
@@ -88,7 +80,7 @@
 
     - name: Install Pod Network (Flannel)
       become_user: "{{ ansible_user }}"
-      shell: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+      shell: kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
       args:
         chdir: "/home/{{ ansible_user }}"
         creates: pod_network_setup.log
