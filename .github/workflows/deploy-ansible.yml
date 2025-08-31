@@ -35,7 +35,4 @@ jobs:
         working-directory: ansible/deploy-swarm
         run: |
           ansible-playbook -i inventory/inventory.yaml kube_masters.yml
-      - name: Kube workers Playbook
-        working-directory: ansible/deploy-swarm
-        run: |
-          ansible-playbook -i inventory/inventory.yaml kube_workers.yml
+
