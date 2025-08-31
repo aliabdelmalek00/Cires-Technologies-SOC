@@ -12,13 +12,7 @@
     - wazuh_certs
     - wazuh_nginx_conf
     
-- name: Ensure NFS volume is mounted
-  ansible.builtin.mount:
-    path: {{ mount}}
-    src: "{{ nfs_server }}:/share"
-    fstype: nfs
-    opts: rw,sync
-    state: mounted
+
     
 - name: Create Docker overlay network
   community.docker.docker_network:
@@ -54,6 +48,7 @@
     delay: 10
     timeout: 600
     state: started
+
 
 
 
