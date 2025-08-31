@@ -27,8 +27,9 @@ services:
       - "/share/wazuh/traefik:/letsencrypt"
     networks:
       - wazuh-net
-    labels:
-      traefik.enable: "true"
+    deploy:
+      labels:
+        - "traefik.enable=true"
       
   wazuh-master:
     image: wazuh/wazuh-manager:4.12.0
