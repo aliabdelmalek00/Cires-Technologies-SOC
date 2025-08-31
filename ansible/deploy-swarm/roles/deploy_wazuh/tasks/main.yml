@@ -1,4 +1,3 @@
----
 - name: Remove old Wazuh Docker volumes
   community.docker.docker_volume:
     name: "{{ item }}"
@@ -11,9 +10,7 @@
     - wazuh_dashboard_data
     - wazuh_certs
     - wazuh_nginx_conf
-    
 
-    
 - name: Create Docker overlay network
   community.docker.docker_network:
     name: wazuh-net
@@ -21,21 +18,17 @@
     attachable: yes
     state: present
 
-
-
 - name: Render Wazuh stack template
   ansible.builtin.template:
     src: roles/deploy_wazuh/templates/wazuh-stack.yml.j2
-    dest: /tmp/docker-compose.yml
+    dest: /tmp/wazuh-stack.yml
 
-- name: Deploy Wazuh stack with Docker Compose V2
-  community.docker.docker_compose_v2:
-    project_src: /tmp
-    files:
-      - wazuh-stack.yml
+- name: Deploy Wazuh stack with Docker Swarm
+  community.docker.docker_stack:
+    name: wazuh
     state: present
-    pull: always
-    recreate: yes
+    compose:
+      - /tmp/wazuh-stack.yml
   environment:
     UID: "{{ ansible_user_uid }}"
     GID: "{{ ansible_user_gid }}"
@@ -48,6 +41,7 @@
     delay: 10
     timeout: 600
     state: started
+
 
 
 
