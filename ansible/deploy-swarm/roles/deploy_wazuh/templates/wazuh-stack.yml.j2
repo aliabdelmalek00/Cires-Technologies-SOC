@@ -230,27 +230,28 @@ services:
       - /share/wazuh/dashboard/config:/usr/share/wazuh-dashboard/data/wazuh/config
       - /share/wazuh/dashboard/custom:/usr/share/wazuh-dashboard/plugins/wazuh/public/assets/custom
 
+  services:
   traefik:
-    image: traefik:v3.1
-    networks:
-      - wazuh-net
+    image: traefik:v2.11
     command:
-      - "--providers.docker.swarmMode=true"
-      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
-      - "--providers.docker.exposedbydefault=false"
+      - "--api.insecure=true"                     
+      - "--providers.docker=true"
+      - "--providers.docker.exposedByDefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.letsencrypt.acme.email=ali.abdelmalek00@gmail.com"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.wazuh-tcp.address=:1514/tcp"
+      - "--certificatesresolvers.le.acme.tlschallenge=true"
+      - "--certificatesresolvers.le.acme.email=ali.abdelmalek00@gmail.com"
+      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
     ports:
-      - 80:80
-      - 443:443
+      - "80:80"
+      - "443:443"
+      - "1514:1514/tcp"
+      - "8080:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /share/traefik/letsencrypt:/letsencrypt
-    deploy:
-      placement:
-        constraints:
-          - node.hostname == master2
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/share/wazuh/traefik:/letsencrypt"
+    networks:
+      - wazuh-net
+    labels:
+      traefik.enable: "true"
