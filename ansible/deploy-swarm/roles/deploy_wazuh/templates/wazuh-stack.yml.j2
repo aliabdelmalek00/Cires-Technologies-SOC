@@ -212,7 +212,7 @@ services:
         condition: on-failure
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.wazuh.rule=Host(`wazuh.example.com`)"
+        - "traefik.http.routers.wazuh.rule=Host(`wazuh.dashboard`)"
         - "traefik.http.routers.wazuh.entrypoints=websecure"
         - "traefik.http.routers.wazuh.tls.certresolver=letsencrypt"
         - "traefik.http.services.wazuh.loadbalancer.server.port=5601"
