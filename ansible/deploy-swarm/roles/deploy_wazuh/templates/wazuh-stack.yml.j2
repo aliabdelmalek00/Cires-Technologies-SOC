@@ -145,6 +145,7 @@ services:
     environment:
       - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
       - bootstrap.memory_lock=true
+      - OPENSEARCH_PATH_CONF=/usr/share/wazuh-indexer/config
     ulimits:
       memlock:
         soft: -1
@@ -154,7 +155,9 @@ services:
         hard: 65536
     volumes:
       - /share/wazuh/indexer1/data:/var/lib/wazuh-indexer
-      - /share/config/wazuh_indexer_ssl_certs:/etc/wazuh-indexer/certs:ro
+      - /share/config/wazuh_indexer_ssl_certs/root-ca.pem:/usr/share/wazuh-indexer/config/certs/root-ca.pem
+      - /share/config/wazuh_indexer_ssl_certs/wazuh1.indexer-key.pem:/usr/share/wazuh-indexer/config/certs/wazuh1.indexer.key
+      - /share/config/wazuh_indexer_ssl_certs/wazuh1.indexer.pem:/usr/share/wazuh-indexer/config/certs/wazuh1.indexer.pem
       - /share/config/wazuh_indexer_ssl_certs/admin.pem:/usr/share/wazuh-indexer/config/certs/admin.pem
       - /share/config/wazuh_indexer_ssl_certs/admin-key.pem:/usr/share/wazuh-indexer/config/certs/admin-key.pem
       - /share/config/wazuh_indexer/wazuh1.indexer.yml:/usr/share/wazuh-indexer/config/opensearch.yml
