@@ -9,8 +9,8 @@ services:
     image: traefik:v2.11
     command:
       - "--api.insecure=true"                     
-      - "--providers.docker=true"
-      - "--providers.docker.exposedByDefault=false"
+      - "providers.docker.swarmmode=true"
+      - "providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.wazuh-tcp.address=:1514/tcp"
