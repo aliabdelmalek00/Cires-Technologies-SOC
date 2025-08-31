@@ -1,12 +1,12 @@
 all:
   children:
-    control_plane:
+    master:
       hosts:
-        cp1:
+        master1:
           ansible_host: 10.10.2.9
-        cp2:
+        master2:
           ansible_host: 10.10.2.10
-        cp3:
+        master3:
           ansible_host: 10.10.2.11 
     workers:
       hosts:
