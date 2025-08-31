@@ -1,27 +1,45 @@
-
-- name: Configure Join Commands on Master Node
-  hosts: master
+- name: Retrieve Join Command from First Master
+  hosts: master1
   become: yes
   tasks:
     - name: Retrieve Join Command
       shell: kubeadm token create --print-join-command
       register: join_command_raw
 
-    - name: Set Join Command
+    - name: Set Join Command fact
       set_fact:
         join_command: "{{ join_command_raw.stdout_lines[0] }}"
+      # Make this fact available to all hosts
+      run_once: true
+      delegate_to: localhost
+
+- name: Join Other Masters
+  hosts: master2:master3
+  become: yes
+  tasks:
+    - name: Wait for master1 API to be ready
+      wait_for: 
+        host: "{{ hostvars['master1'].ansible_host }}"
+        port: 6443
+        timeout: 120
+
+    - name: Join master node to cluster
+      shell: "{{ hostvars['master1'].join_command }} --control-plane --certificate-key <CERT_KEY_HERE>"
+      args:
+        chdir: "/home/{{ ansible_user }}"
+        creates: node_joined.log
 
 - name: Join Worker Nodes
   hosts: workers
   become: yes
   tasks:
-    - name: Enable TCP port 6443 (On Master) is able to connect from Worker
+    - name: Wait for master1 API to be ready
       wait_for: 
         host: "{{ hostvars['master1'].ansible_host }}"
         port: 6443
-        timeout: 60
+        timeout: 120
 
-    - name: Join worker to cluster
+    - name: Join worker node to cluster
       shell: "{{ hostvars['master1'].join_command }}"
       args:
         chdir: "/home/{{ ansible_user }}"
