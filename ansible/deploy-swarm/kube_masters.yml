@@ -1,8 +1,7 @@
-- hosts: master
+- hosts: master1
   become: yes
   vars:
     kube_config_path: "/home/{{ ansible_user }}/.kube/config"
-
   tasks:
     - name: Create an empty kubeadm config if not exists
       copy:
@@ -40,7 +39,6 @@
       args:
         chdir: "/home/{{ ansible_user }}"
         creates: cluster_initialized.log
-      when: inventory_hostname == 'master1'
       register: init_output
 
     - name: Wait for Kubernetes API server to be ready
@@ -49,22 +47,24 @@
       retries: 10
       delay: 15
       until: api_ready.rc == 0
-      when: inventory_hostname == 'master1'
 
-    - name: Extract control-plane join command
+    - name: Extract join commands
       set_fact:
         cp_join_command: "{{ init_output.stdout | regex_search('kubeadm join .*--control-plane --certificate-key [a-f0-9]+', '\\0') }}"
-      when: inventory_hostname == 'master1'
-
-    - name: Extract worker join command
-      set_fact:
         worker_join_command: "{{ init_output.stdout | regex_search('kubeadm join .*', '\\0') }}"
-      when: inventory_hostname == 'master1'
+      run_once: true
 
-    - name: Create .kube directory for user
+    - name: Make join commands available to all hosts
+      add_host:
+        name: join_commands
+        cp_join_command: "{{ cp_join_command }}"
+        worker_join_command: "{{ worker_join_command }}"
+      run_once: true
+
+    - name: Create .kube directory
       become_user: "{{ ansible_user }}"
       file:
-        path: "/home/{{ ansible_user }}/.kube"
+        path: "{{ kube_config_path | dirname }}"
         state: directory
         mode: 0755
 
@@ -76,7 +76,6 @@
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         mode: 0644
-      when: inventory_hostname == 'master1'
 
     - name: Install Pod Network (Flannel)
       become_user: "{{ ansible_user }}"
@@ -84,7 +83,6 @@
       args:
         chdir: "/home/{{ ansible_user }}"
         creates: pod_network_setup.log
-      when: inventory_hostname == 'master1'
 
 - hosts: master2:master3
   become: yes
@@ -96,7 +94,7 @@
         timeout: 180
 
     - name: Join master node to cluster as control-plane
-      shell: "{{ hostvars['master1'].cp_join_command }}"
+      shell: "{{ hostvars['join_commands'].cp_join_command }}"
       args:
         chdir: "/home/{{ ansible_user }}"
         creates: node_joined.log
@@ -120,7 +118,7 @@
         timeout: 180
 
     - name: Join worker node to cluster
-      shell: "{{ hostvars['master1'].worker_join_command }}"
+      shell: "{{ hostvars['join_commands'].worker_join_command }}"
       args:
         chdir: "/home/{{ ansible_user }}"
         creates: node_joined.log
