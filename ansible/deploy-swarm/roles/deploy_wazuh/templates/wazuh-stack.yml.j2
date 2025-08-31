@@ -17,7 +17,7 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "/share/config/wazuh_indexer_ssl_certs:/certs:ro"
-      - "./traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "/share/traefik.yml:/etc/traefik/traefik.yml:ro"
     networks:
       - wazuh-net
     deploy:
