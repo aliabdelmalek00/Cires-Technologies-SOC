@@ -24,8 +24,8 @@
   roles:
     - worker_join_docker_swarm
 
-- name: Deploy Portainer
+- name: Deploy Wazuh
   hosts: managers[0]
   become: true
   roles:
-    - portainer_deploy
+    - deploy_wazuh
