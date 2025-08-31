@@ -8,7 +8,26 @@ services:
   traefik:
     image: traefik:v2.11
     command:
-      - "--configFile=/etc/traefik/traefik.yml"
+      # Traefik entrypoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.wazuh-tcp.address=:1514/tcp"
+      
+      # Enable Docker provider
+      - "--providers.docker"
+      - "--providers.docker.swarmmode=true"
+      - "--providers.docker.network=wazuh-net"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.endpoint=tcp://manager1:2375"
+      
+      # TLS static configuration using Wazuh certs
+      - "--tls.stores.defaultCertificate.certFile=/certs/wazuh-dashboard.pem"
+      - "--tls.stores.defaultCertificate.keyFile=/certs/wazuh-dashboard-key.pem"
+
+      # Optional: Traefik dashboard o80
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--entrypoints.traefik.address=:8080"
     ports:
       - "80:80"
       - "443:443"
@@ -16,8 +35,7 @@ services:
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "/share/config/wazuh_indexer_ssl_certs:/certs:ro"
-      - "/share/traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "/share/config/wazuh_indexer_ssl_certs:/certs:ro"  # Wazuh certificates here
     networks:
       - wazuh-net
     deploy:
