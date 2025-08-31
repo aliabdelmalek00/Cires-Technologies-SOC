@@ -1,6 +1,5 @@
-- name: Setup Docker & NFS on Ubuntu
+- name: Kubernetes Dependencies
   hosts: all
   become: true
   roles:
-    - docker_install
-    - mount_nfs
+    - kube_dependencies
