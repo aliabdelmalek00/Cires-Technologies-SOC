@@ -242,6 +242,7 @@ services:
         - "traefik.http.routers.wazuh.rule=Host(`wazuh.dashboard`)"
         - "traefik.http.routers.wazuh.entrypoints=websecure"
         - "traefik.http.routers.wazuh.tls.certresolver=le"
+        - "traefik.http.routers.wazuh.service=wazuh-svc"
         - "traefik.http.services.wazuh.loadbalancer.server.port=5601"
     environment:
       - OPENSEARCH_HOSTS=https://wazuh1.indexer:9200
