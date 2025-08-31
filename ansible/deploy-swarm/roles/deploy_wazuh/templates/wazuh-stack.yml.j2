@@ -1,9 +1,6 @@
 version: "3.9"
 
-secrets:
-  wazuh_api_credentials: { external: true }
-  dashboard_credentials: { external: true }
-  indexer_credentials: { external: true }
+
   
 networks:
   wazuh-net:
@@ -52,10 +49,7 @@ services:
       nofile:
         soft: 655360
         hard: 655360
-    secrets:
-      - wazuh_api_credentials
-      - dashboard_credentials
-      - indexer_credentials
+ 
     environment:
       - INDEXER_URL=https://wazuh1.indexer:9200
       - INDEXER_USERNAME={{ indexer_username }}
@@ -110,10 +104,7 @@ services:
       nofile:
         soft: 655360
         hard: 655360
-    secrets:
-      - wazuh_api_credentials
-      - dashboard_credentials
-      - indexer_credentials
+
     environment:
       - INDEXER_URL=https://wazuh1.indexer:9200
       - INDEXER_USERNAME={{ indexer_username }}
@@ -246,10 +237,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-    secrets:
-      - wazuh_api_credentials
-      - dashboard_credentials
-      - indexer_credentials
+ 
     environment:
       - OPENSEARCH_HOSTS=https://wazuh1.indexer:9200
       - WAZUH_API_URL=https://wazuh.master
