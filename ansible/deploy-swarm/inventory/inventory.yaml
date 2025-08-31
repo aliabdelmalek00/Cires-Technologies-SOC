@@ -3,14 +3,14 @@ all:
     managers:
       hosts:
         manager1:
-          ansible_host: 10.10.2.16
+          ansible_host: 10.10.2.22
         manager2:
-          ansible_host: 10.10.2.18
+          ansible_host: 10.10.2.23
         manager3:
-          ansible_host: 10.10.2.17
+          ansible_host: 10.10.2.24
     workers:
       hosts:
         worker1:
-          ansible_host: 10.10.2.19
+          ansible_host: 10.10.2.26
         worker2:
-          ansible_host: 10.10.2.20
+          ansible_host: 10.10.2.25
