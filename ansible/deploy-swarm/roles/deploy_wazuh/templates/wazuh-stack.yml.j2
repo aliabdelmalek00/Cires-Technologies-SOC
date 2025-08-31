@@ -8,8 +8,7 @@ services:
   traefik:
     image: traefik:v2.11
     command:
-      - "--api.insecure=true"      
-      - "--providers.docker"
+      - "--api.insecure=true" 
       - "--providers.docker.swarmmode=true"
       - "--providers.docker.network=wazuh-net"
       - "--providers.docker.exposedbydefault=false"
