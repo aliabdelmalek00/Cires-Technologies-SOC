@@ -1,13 +1,14 @@
 - hosts: master
   become: yes
   tasks:
-    - name: Create an Empty file for Kubeadm configuring
+
+    - name: Create an empty kubeadm config
       copy:
         content: ""
         dest: /etc/kubernetes/kubeadm-config.yaml
         force: no
 
-    - name: Configure container runtime
+    - name: Configure container runtime and cluster
       blockinfile:
         path: /etc/kubernetes/kubeadm-config.yaml
         block: |
@@ -16,6 +17,7 @@
           controlPlaneEndpoint: "10.10.2.9:6443"
           networking:
             podSubnet: "10.244.0.0/16"
+          imageRepository: registry.k8s.io
           ---
           kind: KubeletConfiguration
           apiVersion: kubelet.config.k8s.io/v1beta1
@@ -29,32 +31,46 @@
             memory: 50M
           enforceNodeAllocatable:
           - pods
+          sandboxImage: "registry.k8s.io/pause:3.9"
 
-    - name: Initialize the cluster
+    - name: Initialize cluster only on master1
       shell: kubeadm init --config /etc/kubernetes/kubeadm-config.yaml >> cluster_initialized.log
       args:
         chdir: "/home/{{ ansible_user }}"
         creates: cluster_initialized.log
+      when: inventory_hostname == 'master1'
+      register: init_output
+
+    - name: Set join command for control-plane nodes
+      set_fact:
+        cp_join_command: "{{ init_output.stdout_lines | join(' ') }} --control-plane"
+      when: inventory_hostname == 'master1'
+
+    - name: Join other masters as control-plane nodes
+      shell: "{{ hostvars['master1'].cp_join_command }} >> master_join.log"
+      args:
+        chdir: "/home/{{ ansible_user }}"
+        creates: master_join.log
+      when: inventory_hostname != 'master1'
 
     - name: Create .kube directory
-      become: yes
       become_user: "{{ ansible_user }}"
       file:
-        path: $HOME/.kube
+        path: "/home/{{ ansible_user }}/.kube"
         state: directory
         mode: 0755
 
-    - name: Copy admin.conf to User's kube config
+    - name: Copy admin.conf to user's kube config
       copy:
         src: /etc/kubernetes/admin.conf
         dest: "/home/{{ ansible_user }}/.kube/config"
         remote_src: yes
         owner: "{{ ansible_user }}"
 
-    - name: Install Pod Network
-      become: yes
+    - name: Install Pod Network (only on master1)
       become_user: "{{ ansible_user }}"
       shell: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml >> pod_network_setup.log
       args:
-        chdir: $HOME
+        chdir: "/home/{{ ansible_user }}"
         creates: pod_network_setup.log
+      when: inventory_hostname == 'master1'
