@@ -44,7 +44,7 @@
       register: init_output
 
     - name: Wait for Kubernetes API server to be ready
-      shell: kubectl get nodes
+      shell: kubectl --kubeconfig=/etc/kubernetes/admin.conf get nodes
       register: api_ready
       retries: 10
       delay: 15
