@@ -21,7 +21,7 @@
 - name: Create all Wazuh secrets in Swarm
   community.docker.docker_secret:
     name: "{{ item.name }}"
-    secret: "{{ item.value }}"
+    data: "{{ item.value }}"
     state: present
   loop:
     - { name: wazuh_api_credentials, value: "{{ wazuh_api_username }}:{{ wazuh_api_password }}" }
@@ -43,6 +43,7 @@
     UID: "{{ ansible_user_uid }}"
     GID: "{{ ansible_user_gid }}"
   register: wazuh_stack
+
 
 
 
