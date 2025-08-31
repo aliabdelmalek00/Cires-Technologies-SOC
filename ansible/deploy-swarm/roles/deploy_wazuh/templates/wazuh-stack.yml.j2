@@ -8,8 +8,10 @@ services:
   traefik:
     image: traefik:v2.11
     command:
-      - "--api.insecure=true"                     
+      - "--api.insecure=true"      
+      - "--providers.docker"
       - "--providers.docker.swarmmode=true"
+      - "--providers.docker.network=wazuh-net"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
@@ -241,10 +243,8 @@ services:
         - "traefik.enable=true"
         - "traefik.http.routers.wazuh.rule=Host(`wazuh.dashboard`)"
         - "traefik.http.routers.wazuh.entrypoints=websecure"
-        - "traefik.http.routers.wazuh.tls.passthrough=true"
         - "traefik.http.routers.wazuh.tls=true"
-        - "traefik.http.routers.wazuh.tls.certresolver=le"
-        - "traefik.http.routers.wazuh.service=wazuh"
+        - "traefik.http.routers.wazuh.tls.passthrough=true"
         - "traefik.http.services.wazuh.loadbalancer.server.port=5601"
     environment:
       - OPENSEARCH_HOSTS=https://wazuh1.indexer:9200
