@@ -5,47 +5,23 @@ networks:
     external: true
 
 services:
-  traefik:
-    image: traefik:v2.11
-    command:
-      # Traefik entrypoints
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.wazuh-tcp.address=:1514/tcp"
-      
-      # Enable Docker provider
-      - "--providers.docker"
-      - "--providers.docker.swarmmode=true"
-      - "--providers.docker.network=wazuh-net"
-      - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.endpoint=tcp://manager1:2375"
-      
-      # TLS static configuration using Wazuh certs
-      - "--tls.stores.defaultCertificate.certFile=/certs/wazuh-dashboard.pem"
-      - "--tls.stores.defaultCertificate.keyFile=/certs/wazuh-dashboard-key.pem"
-
-      # Optional: Traefik dashboard o80
-      - "--api.insecure=true"
-      - "--api.dashboard=true"
-      - "--entrypoints.traefik.address=:8080"
-    ports:
-      - "80:80"
-      - "443:443"
-      - "1514:1514/tcp"
-      - "8080:8080"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "/share/config/wazuh_indexer_ssl_certs:/certs:ro"  # Wazuh certificates here
-    networks:
-      - wazuh-net
+  nginx:
+    image: nginx:stable
+    hostname: nginx
     deploy:
-      labels:
-        - "traefik.enable=true"
-      mode: replicated
       replicas: 1
+      restart_policy:
+        condition: any
       placement:
         constraints:
-          - node.role == manager
+          - node.role == worker
+    ports:
+      - target: 1514
+        published: 1514
+    networks:
+      - wazuh_net
+    volumes:
+      - /share/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       
   wazuh-master:
     image: wazuh/wazuh-manager:4.12.0
@@ -257,14 +233,6 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-      labels:
-        - "traefik.enable=true"
-        - "traefik.docker.network=wazuh-net"
-        - "traefik.http.routers.wazuh.rule=Host(`wazuh.dashboard`)"
-        - "traefik.http.routers.wazuh.entrypoints=websecure"
-        - "traefik.http.routers.wazuh.tls=true"
-        #- "traefik.http.routers.wazuh.tls.passthrough=true"
-        - "traefik.http.services.wazuh.loadbalancer.server.port=5601"
     environment:
       - OPENSEARCH_HOSTS=https://wazuh1.indexer:9200
       - WAZUH_API_URL=https://wazuh.master
@@ -272,6 +240,8 @@ services:
       - API_PASSWORD=MyS3cr37P450r.*-
       - DASHBOARD_USERNAME=kibanaserver
       - DASHBOARD_PASSWORD=kibanaserver
+    ports:
+      - 443:5601
     volumes:
       - /share/config/wazuh_indexer_ssl_certs/wazuh.dashboard.pem:/usr/share/wazuh-dashboard/certs/wazuh-dashboard.pem
       - /share/config/wazuh_indexer_ssl_certs/wazuh.dashboard-key.pem:/usr/share/wazuh-dashboard/certs/wazuh-dashboard-key.pem
