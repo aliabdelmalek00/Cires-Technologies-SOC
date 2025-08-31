@@ -44,7 +44,6 @@ services:
       - /share/wazuh/master/queue:/var/ossec/queue
       - /share/wazuh/master/var_multigroups:/var/ossec/var/multigroups
       - /share/wazuh/master/integrations:/var/ossec/integrations
-      - /share/wazuh/master/active_response:/var/ossec/active-response/bin
       - /share/wazuh/master/agentless:/var/ossec/agentless
       - /share/wazuh/master/wodles:/var/ossec/wodles
       - /share/filebeat/master/etc:/etc/filebeat
@@ -95,7 +94,6 @@ services:
       - /share/wazuh/worker/queue:/var/ossec/queue
       - /share/wazuh/worker/var_multigroups:/var/ossec/var/multigroups
       - /share/wazuh/worker/integrations:/var/ossec/integrations
-      - /share/wazuh/worker/active_response:/var/ossec/active-response/bin
       - /share/wazuh/worker/agentless:/var/ossec/agentless
       - /share/wazuh/worker/wodles:/var/ossec/wodles
       - /share/filebeat/worker/etc:/etc/filebeat
