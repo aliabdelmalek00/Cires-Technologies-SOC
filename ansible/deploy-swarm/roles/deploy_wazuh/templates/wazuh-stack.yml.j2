@@ -15,8 +15,6 @@ services:
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.wazuh-tcp.address=:1514/tcp"
-      - "--certificatesresolvers.le.acme.tlschallenge=true"
-      - "--certificatesresolvers.le.acme.email=ali.abdelmalek00@gmail.com"
     ports:
       - "80:80"
       - "443:443"
