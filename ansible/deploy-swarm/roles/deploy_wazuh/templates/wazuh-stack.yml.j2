@@ -24,10 +24,19 @@ services:
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      #- "/share/wazuh/traefik:/letsencrypt"
+      - "/share/config/wazuh_indexer_ssl_certs/wazuh.dashboard.pem:/certs/wazuh-dashboard.pem:ro"
+      - "/share/config/wazuh_indexer_ssl_certs/wazuh.dashboard-key.pem:/certs/wazuh-dashboard-key.pem:ro"
     networks:
       - wazuh-net
     deploy:
+      labels:
+        - "traefik.enable=true"
+        # Dashboard router
+        - "traefik.http.routers.wazuh-dashboard.rule=Host(`wazuh.dashboard`)"
+        - "traefik.http.routers.wazuh-dashboard.entrypoints=websecure"
+        - "traefik.http.routers.wazuh-dashboard.tls=true"
+        - "traefik.http.routers.wazuh-dashboard.tls.certificates[0].certFile=/certs/wazuh-dashboard.pem"
+        - "traefik.http.routers.wazuh-dashboard.tls.certificates[0].keyFile=/certs/wazuh-dashboard-key.pem"
       mode: replicated
       replicas: 1
       labels:
