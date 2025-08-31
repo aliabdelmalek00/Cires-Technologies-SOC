@@ -13,6 +13,7 @@
         block: |
           kind: ClusterConfiguration
           apiVersion: kubeadm.k8s.io/v1beta3
+          controlPlaneEndpoint: "10.10.2.9:6443"
           networking:
             podSubnet: "10.244.0.0/16"
           ---
@@ -32,12 +33,12 @@
     - name: Initialize the cluster
       shell: kubeadm init --config /etc/kubernetes/kubeadm-config.yaml >> cluster_initialized.log
       args:
-        chdir: /home/azureuser
+        chdir: /home/{{ ansible_user }}
         creates: cluster_initialized.log
 
     - name: Create .kube directory
       become: yes
-      become_user: azureuser
+      become_user: {{ ansible_user }}
       file:
         path: $HOME/.kube
         state: directory
@@ -46,13 +47,13 @@
     - name: Copy admin.conf to User's kube config
       copy:
         src: /etc/kubernetes/admin.conf
-        dest: /home/azureuser/.kube/config
+        dest: /home/{{ ansible_user }}/.kube/config
         remote_src: yes
         owner: azureuser
 
     - name: Install Pod Network
       become: yes
-      become_user: azureuser
+      become_user: {{ ansible_user }}
       shell: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml >> pod_network_setup.log
       args:
         chdir: $HOME
