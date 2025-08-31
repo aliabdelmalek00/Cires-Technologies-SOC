@@ -27,36 +27,6 @@
     attachable: yes
     state: present
 
-- name: Ensure Docker build directories exist
-  ansible.builtin.file:
-    path: "/tmp/{{ item }}"
-    state: directory
-    mode: '0755'
-  loop:
-    - dockerfile1
-    - dockerfile2
-    - dockerfile3
-
-- name: Render Dockerfile for each Indexer
-  ansible.builtin.template:
-    src: "roles/deploy_wazuh/templates/Dockerfile.j2"
-    dest: "/tmp/{{ item }}/Dockerfile"
-  loop:
-    - dockerfile1
-    - dockerfile2
-    - dockerfile3
-
-- name: Copy certificates into Docker build directories
-  ansible.builtin.copy:
-    src: "/share/wazuh/config/wazuh_indexer_ssl_certs/"
-    dest: "/tmp/{{ item }}/certs/"
-    owner: root
-    group: root
-    mode: '0640'
-  loop:
-    - dockerfile1
-    - dockerfile2
-    - dockerfile3
 
 
 - name: Render Wazuh stack template
@@ -84,6 +54,7 @@
     delay: 10
     timeout: 600
     state: started
+
 
 
 
