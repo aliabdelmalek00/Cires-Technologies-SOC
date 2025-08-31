@@ -24,7 +24,14 @@
   ansible.builtin.template:
     src: roles/deploy_wazuh/templates/wazuh-stack.yml.j2
     dest: /tmp/wazuh-stack.yml
-
+  vars:
+    wazuh_api_username: "{{ wazuh_api_username }}"
+    wazuh_api_password: "{{ wazuh_api_password }}"
+    dashboard_username: "{{ dashboard_username }}"
+    dashboard_password: "{{ dashboard_password }}"
+    indexer_username: "{{ indexer_username }}"
+    indexer_password: "{{ indexer_password }}"
+    
 - name: Deploy Wazuh stack with Docker Swarm
   community.docker.docker_stack:
     name: wazuh
@@ -35,6 +42,7 @@
     UID: "{{ ansible_user_uid }}"
     GID: "{{ ansible_user_gid }}"
   register: wazuh_stack
+
 
 
 
