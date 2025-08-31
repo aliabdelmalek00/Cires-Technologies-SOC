@@ -67,10 +67,11 @@
         remote_src: yes
         owner: "{{ ansible_user }}"
 
-    - name: Install Pod Network (only on master1)
+    - name: Install Pod Network
+      become: yes
       become_user: "{{ ansible_user }}"
       shell: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml >> pod_network_setup.log
       args:
-        chdir: "/home/{{ ansible_user }}"
+        chdir: $HOME
         creates: pod_network_setup.log
       when: inventory_hostname == 'master1'
