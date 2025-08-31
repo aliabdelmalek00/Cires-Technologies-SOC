@@ -5,6 +5,31 @@ networks:
     external: true
 
 services:
+  traefik:
+    image: traefik:v2.11
+    command:
+      - "--api.insecure=true"                     
+      - "--providers.docker=true"
+      - "--providers.docker.exposedByDefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.wazuh-tcp.address=:1514/tcp"
+      - "--certificatesresolvers.le.acme.tlschallenge=true"
+      - "--certificatesresolvers.le.acme.email=ali.abdelmalek00@gmail.com"
+      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "1514:1514/tcp"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/share/wazuh/traefik:/letsencrypt"
+    networks:
+      - wazuh-net
+    labels:
+      traefik.enable: "true"
+      
   wazuh-master:
     image: wazuh/wazuh-manager:4.12.0
     hostname: wazuh.master
@@ -229,29 +254,4 @@ services:
       - /share/config/wazuh_dashboard/wazuh.yml:/usr/share/wazuh-dashboard/data/wazuh/config/wazuh.yml
       - /share/wazuh/dashboard/config:/usr/share/wazuh-dashboard/data/wazuh/config
       - /share/wazuh/dashboard/custom:/usr/share/wazuh-dashboard/plugins/wazuh/public/assets/custom
-
-  services:
-  traefik:
-    image: traefik:v2.11
-    command:
-      - "--api.insecure=true"                     
-      - "--providers.docker=true"
-      - "--providers.docker.exposedByDefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.wazuh-tcp.address=:1514/tcp"
-      - "--certificatesresolvers.le.acme.tlschallenge=true"
-      - "--certificatesresolvers.le.acme.email=ali.abdelmalek00@gmail.com"
-      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
-    ports:
-      - "80:80"
-      - "443:443"
-      - "1514:1514/tcp"
-      - "8080:8080"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "/share/wazuh/traefik:/letsencrypt"
-    networks:
-      - wazuh-net
-    labels:
-      traefik.enable: "true"
+  
