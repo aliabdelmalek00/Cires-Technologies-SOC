@@ -14,7 +14,7 @@
     
 - name: Ensure NFS volume is mounted
   ansible.builtin.mount:
-    path: /share
+    path: {{ mount}}
     src: "{{ nfs_server }}:/share"
     fstype: nfs
     opts: rw,sync
@@ -54,6 +54,7 @@
     delay: 10
     timeout: 600
     state: started
+
 
 
 
