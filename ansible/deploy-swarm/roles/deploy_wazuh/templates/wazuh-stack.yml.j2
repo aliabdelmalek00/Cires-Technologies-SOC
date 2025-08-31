@@ -13,6 +13,7 @@ services:
       - "--providers.docker.swarmmode=true"
       - "--providers.docker.network=wazuh-net"
       - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.endpoint=tcp://manager1:2375"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.wazuh-tcp.address=:1514/tcp"
@@ -32,6 +33,9 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
+      placement:
+        constraints:
+          - node.role == manager
       
   wazuh-master:
     image: wazuh/wazuh-manager:4.12.0
