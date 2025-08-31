@@ -37,8 +37,6 @@ services:
         - "traefik.http.routers.wazuh-dashboard.tls.certificates[0].keyFile=/certs/wazuh-dashboard-key.pem"
       mode: replicated
       replicas: 1
-      labels:
-        - "traefik.enable=true"
       placement:
         constraints:
           - node.role == manager
