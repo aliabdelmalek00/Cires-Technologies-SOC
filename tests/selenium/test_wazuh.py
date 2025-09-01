@@ -27,18 +27,23 @@ def test_dashboard_https(driver):
 
 
 def test_login_form_elements(driver):
-    dashboard_url = os.getenv("DASHBOARD_URL", "https://20.220.18.183/")
+    dashboard_url = os.getenv("DASHBOARD_URL", "https://20.220.18.183/app/login")
     driver.get(dashboard_url)
 
-    # Check username field
-    username_input = driver.find_element(By.NAME, "username")
-    assert username_input.is_displayed()
+    # Wait up to 10 seconds for username input to appear
+    username_input = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.NAME, "username"))
+    )
 
-    # Check password field
     password_input = driver.find_element(By.NAME, "password")
+    login_button = driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
+
+    assert username_input.is_displayed()
     assert password_input.is_displayed()
+    assert login_button.is_displayed()
 
     # Check login button
     login_button = driver.find_element(By.TAG_NAME, "button")
     assert login_button.is_displayed()
+
 
