@@ -53,6 +53,15 @@ jobs:
           dashboard_password=$DASHBOARD_PASSWORD \
           indexer_username=$INDEXER_USERNAME \
           indexer_password=$INDEXER_PASSWORD"
+
+      - name: Install Chrome & Chromedriver
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser chromium-chromedriver
+
+      - name: Run Selenium tests
+        run: |
+          pytest tests/selenium/ --maxfail=1 --disable-warnings -q
           
       - name: Build Wazuh Manager Docker image
         run: |
@@ -72,12 +81,5 @@ jobs:
         run: |
           trivy image --exit-code 1 --severity HIGH,CRITICAL 1f81bb89d355
     
-      - name: Install Chrome & Chromedriver
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser chromium-chromedriver
 
-      - name: Run Selenium tests
-        run: |
-          pytest tests/selenium/ --maxfail=1 --disable-warnings -q
 
