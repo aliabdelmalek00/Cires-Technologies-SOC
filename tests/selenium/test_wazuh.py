@@ -9,6 +9,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
+import tempfile
+
+
 # -----------------------------
 # Configuration
 # -----------------------------
@@ -74,5 +77,6 @@ try:
     print("API health check passed:", json.dumps(data, indent=2))
 except Exception as e:
     print("API health check failed:", e)
+
 
 
