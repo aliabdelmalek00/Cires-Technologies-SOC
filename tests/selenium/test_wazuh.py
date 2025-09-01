@@ -24,6 +24,8 @@ chrome_options = Options()
 chrome_options.add_argument("--headless")  # run headless
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
+tmp_dir = tempfile.mkdtemp()
+chrome_options.add_argument(f"--user-data-dir={tmp_dir}")
 
 driver = webdriver.Chrome(options=chrome_options)
 
@@ -72,4 +74,5 @@ try:
     print("API health check passed:", json.dumps(data, indent=2))
 except Exception as e:
     print("API health check failed:", e)
+
 
