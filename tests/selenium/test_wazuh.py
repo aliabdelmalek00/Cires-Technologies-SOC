@@ -3,6 +3,7 @@ import pytest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 @pytest.fixture(scope="module")
@@ -45,5 +46,6 @@ def test_login_form_elements(driver):
     # Check login button
     login_button = driver.find_element(By.TAG_NAME, "button")
     assert login_button.is_displayed()
+
 
 
