@@ -23,12 +23,13 @@ TEST_PASSWORD = os.getenv("kibanaserver")
 # -----------------------------
 @pytest.fixture(scope="session")
 def chrome_driver():
-    chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--remote-debugging-port=9222")
+    options = Options()
+    options.add_argument("--headless=new")  # Use new headless mode
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--remote-debugging-port=9222")
 
     # Unique temporary user data directory to avoid session conflicts
     tmp_dir = tempfile.mkdtemp()
@@ -93,3 +94,4 @@ def test_wazuh_api_health():
         assert "cluster_name" in data, "Missing 'cluster_name' in API response"
     except Exception as e:
         pytest.fail(f"API health check failed: {e}")
+
