@@ -118,11 +118,10 @@ Username / Password: (configured via secrets)
 HTTPS enabled using internal certs or Let’s Encrypt
 
 Secrets & Security
-All secrets managed via Ansible Vault and Docker Swarm secrets
+All secrets managed via Github secrets
 
 TLS certificates generated automatically and deployed securely
 
-No secrets or credentials stored in Git
 
 Validation & Testing
 Dashboard accessible via HTTPS
@@ -144,14 +143,7 @@ Automated image scanning with Trivy
 
 Multi-node Wazuh Indexer cluster for higher HA
 
-Threat detection rules and alerts
 
-References / Tools
-Docker Swarm Documentation
-
-Wazuh Documentation
-
-Ansible Documentation
 
 yaml
 Copy code
