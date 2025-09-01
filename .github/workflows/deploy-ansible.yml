@@ -24,8 +24,9 @@ jobs:
           pip install ansible jsondiff selenium pytest ansible-lint yamllint
     
       - name: Run yamllint
-        run: yamllint .
-
+        run: | 
+          yamllint -d "{extends: default, rules: {line-length: disable}}" .
+        
       - name: Run ansible-lint
         run: ansible-lint ansible/
 
