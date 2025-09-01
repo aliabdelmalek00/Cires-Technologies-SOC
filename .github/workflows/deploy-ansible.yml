@@ -58,7 +58,7 @@ jobs:
       - name: Run Playwright tests
         uses: addnab/docker-run-action@v3
         with:
-          image: mcr.microsoft.com/playwright:focal
+          image: mcr.microsoft.com/playwright/python:1.42.0-focal
           options: -v ${{ github.workspace }}:/tests
           run: |
             cd /tests
