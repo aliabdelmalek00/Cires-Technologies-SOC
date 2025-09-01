@@ -56,9 +56,9 @@ jobs:
           
       - name: Build Wazuh Manager Docker image
         run: |
-          docker build -t wazuh-manager:4.12.0 ./docker/wazuh-manager
-          docker build -t wazuh-dashboard:4.12.0 ./docker/wazuh-dashboard
-          docker build -t wazuh-indexer:4.12.0 ./docker/wazuh-indexer
+          sudo docker build -t wazuh-manager:4.12.0 ./docker/wazuh-manager
+          sudo docker build -t wazuh-dashboard:4.12.0 ./docker/wazuh-dashboard
+          sudo docker build -t wazuh-indexer:4.12.0 ./docker/wazuh-indexer
           
       - name: Scan Wazuh Manager
         run: |
