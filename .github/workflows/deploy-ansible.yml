@@ -62,15 +62,15 @@ jobs:
           
       - name: Scan Wazuh Manager
         run: |
-          trivy image --exit-code 1 --severity HIGH,CRITICAL wazuh/wazuh-manager
+          trivy image --exit-code 1 --severity HIGH,CRITICAL a3572c0ec0d8
 
       - name: Scan Wazuh Indexer
         run: |
-          trivy image --exit-code 1 --severity HIGH,CRITICAL wazuh/wazuh-indexer
+          trivy image --exit-code 1 --severity HIGH,CRITICAL 32b09962f7e0
           
       - name: Scan Wazuh Dashboard
         run: |
-          trivy image --exit-code 1 --severity HIGH,CRITICAL wazuh/wazuh-dashboard
+          trivy image --exit-code 1 --severity HIGH,CRITICAL 1f81bb89d355
     
       - name: Install Chrome & Chromedriver
         run: |
