@@ -21,7 +21,8 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --upgrade pip
-          pip install ansible jsondiff selenium pytest ansible-lint yamllint requests webdriver-manager
+          pip install ansible jsondiff selenium  ansible-lint yamllint requests pytest playwright
+          playwright install
     
       - name: Run yamllint
         run: yamllint . || true
