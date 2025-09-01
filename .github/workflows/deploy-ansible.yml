@@ -21,7 +21,48 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --upgrade pip
-          pip install ansible jsondiff
+          pip install ansible jsondiff selenium pytest ansible-lint yamllint
+    
+      - name: Run yamllint
+        run: yamllint .
+
+      - name: Run ansible-lint
+        run: ansible-lint ansible/
+
+    
+      - name: Trivy scan on Wazuh Manager
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: wazuh-manager:latest
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
+
+      - name: Trivy scan on Wazuh Indexer
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: wazuh-indexer:latest
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
+
+      - name: Trivy scan on Wazuh Dashboard
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: wazuh-dashboard:latest
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
+
+    
+      - name: Install Chrome & Chromedriver
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser chromium-chromedriver
+
+      - name: Run Selenium tests
+        run: |
+          pytest tests/selenium/ --maxfail=1 --disable-warnings -q
 
       - name: Test connectivity to target VMs
         run: |
