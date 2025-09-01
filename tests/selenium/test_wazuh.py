@@ -5,8 +5,8 @@ from playwright.sync_api import sync_playwright
 def browser():
     with sync_playwright() as p:
         # Launch Chromium headless
-        browser = p.chromium.launch(headless=True)
-        yield browser
+        browser = p.chromium.launch(headless=False) 
+        context = browser.new_context(ignore_https_errors=True)  
         browser.close()
 
 @pytest.fixture
@@ -34,3 +34,4 @@ def test_dashboard_https_and_login_elements(page):
 
     # Assert something visible in dashboard
     assert page.is_visible("text=Overview")
+
