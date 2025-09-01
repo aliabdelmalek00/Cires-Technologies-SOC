@@ -13,8 +13,8 @@ from selenium.common.exceptions import TimeoutException
 # Configuration
 # -----------------------------
 WAZUH_URL = os.getenv("WAZUH_URL", "https://20.220.18.183")
-TEST_USERNAME = os.getenv("WAZUH_TEST_USER")
-TEST_PASSWORD = os.getenv("WAZUH_TEST_PASSWORD")
+TEST_USERNAME = os.getenv("kibanaserver")
+TEST_PASSWORD = os.getenv("kibanaserver")
 API_URL = os.getenv("WAZUH_API_URL", "https://20.220.18.183:55000")
 
 # -----------------------------
@@ -72,3 +72,4 @@ try:
     print("API health check passed:", json.dumps(data, indent=2))
 except Exception as e:
     print("API health check failed:", e)
+
