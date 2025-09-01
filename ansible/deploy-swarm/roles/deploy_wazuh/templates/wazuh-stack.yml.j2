@@ -51,7 +51,7 @@ services:
         hard: 655360
  
     environment:
-      - INDEXER_URL=https://wazuh1.indexer:9200
+      - INDEXER_URL=https://wazuh1-indexer:9200
       - INDEXER_USERNAME={{ indexer_username }}
       - INDEXER_PASSWORD={{ indexer_password }}
       - FILEBEAT_SSL_VERIFICATION_MODE=full
@@ -106,7 +106,7 @@ services:
         hard: 655360
 
     environment:
-      - INDEXER_URL=https://wazuh1.indexer:9200
+      - INDEXER_URL=https://wazuh1-indexer:9200
       - INDEXER_USERNAME={{ indexer_username }}
       - INDEXER_PASSWORD={{ indexer_password }}
       - FILEBEAT_SSL_VERIFICATION_MODE=full
