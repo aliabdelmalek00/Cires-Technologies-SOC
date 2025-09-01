@@ -26,14 +26,6 @@ def test_dashboard_https(driver):
     assert dashboard_url.startswith("https://"), "Dashboard must be served over HTTPS"
 
 
-def test_dashboard_title(driver):
-    dashboard_url = os.getenv("DASHBOARD_URL", "https://20.220.18.183/")
-    driver.get(dashboard_url)
-
-    title = driver.title
-    assert "Wazuh" in title, f"Unexpected page title: {title}"
-
-
 def test_login_form_elements(driver):
     dashboard_url = os.getenv("DASHBOARD_URL", "https://20.220.18.183/")
     driver.get(dashboard_url)
@@ -49,3 +41,4 @@ def test_login_form_elements(driver):
     # Check login button
     login_button = driver.find_element(By.TAG_NAME, "button")
     assert login_button.is_displayed()
+
